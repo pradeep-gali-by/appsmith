@@ -235,6 +235,17 @@ export function validateWidgetProperty(
   } else {
     validator = VALIDATORS[validationTypeOrValidator];
   }
+  if (property === "tableData") {
+    console.log(
+      "VALIDATIONNNN",
+      widgetType,
+      value,
+      props.widgetName,
+      property,
+      validator(value, props, dataTree),
+    );
+  }
+
   if (validator) {
     return validator(value, props, dataTree);
   } else {
@@ -263,6 +274,15 @@ export function getValidatedTree(
 
       if (property in validationProperties) {
         const value = _.get(entity, property);
+        if (property === "tableData") {
+          console.log(
+            "VALIDATIONNNNNNNN I am here",
+            property,
+            validationProperties,
+            value,
+          );
+        }
+
         // Pass it through parse
         const {
           parsed,

@@ -79,6 +79,7 @@ ctx.addEventListener(
     switch (method) {
       case EVAL_WORKER_ACTIONS.EVAL_TREE: {
         const { widgetTypeConfigMap, unevalTree } = requestData;
+        console.log("VALIDATIONNNN called EVAL_TREE", unevalTree);
         let dataTree: DataTree = unevalTree;
         let errors: EvalError[] = [];
         let dependencies: DependencyMap = {};
@@ -88,6 +89,7 @@ ctx.addEventListener(
             dataTreeEvaluator.createFirstTree(unevalTree);
             dataTree = dataTreeEvaluator.evalTree;
           } else {
+            console.log("VALIDATIONNNNN from spot 1");
             dataTree = dataTreeEvaluator.updateDataTree(unevalTree);
           }
 
@@ -108,6 +110,7 @@ ctx.addEventListener(
             });
             console.error(e);
           }
+          console.log("VALIDATIONNNNN from spot a");
           dataTree = getValidatedTree(widgetTypeConfigMap, unevalTree);
           dataTreeEvaluator = undefined;
         }
@@ -138,6 +141,7 @@ ctx.addEventListener(
         if (!dataTreeEvaluator) {
           return { triggers: [], errors: [] };
         }
+        console.log("VALIDATIONNNNN from spot 2");
         const evalTree = dataTreeEvaluator.updateDataTree(dataTree);
         const withFunctions = addFunctions(evalTree);
         const triggers = dataTreeEvaluator.getDynamicValue(
@@ -178,6 +182,7 @@ ctx.addEventListener(
           value,
           props,
         } = requestData;
+        console.log("VALIDATIONNNN called validate prop");
         return validateWidgetProperty(
           widgetTypeConfigMap,
           widgetType,
@@ -237,6 +242,7 @@ export class DataTreeEvaluator {
     const evaluateEnd = performance.now();
     // Validate Widgets
     const validateStart = performance.now();
+    console.log("VALIDATIONNNNN from spot c");
     const validated = getValidatedTree(this.widgetConfigMap, evaluatedTree);
     const validateEnd = performance.now();
     // Remove functions
@@ -324,6 +330,12 @@ export class DataTreeEvaluator {
     });
 
     const evaluatedTree = this.evaluateTree(this.evalTree, subTreeSortOrder);
+    console.log(
+      "VALIDATIONNNN",
+      this.evalTree,
+      evaluatedTree,
+      subTreeSortOrder,
+    );
     const evalStop = performance.now();
 
     const validateStart = performance.now();
@@ -331,12 +343,13 @@ export class DataTreeEvaluator {
     const updatedWidgets = new Set(
       subTreeSortOrder.map((path) => path.split(".")[0]),
     );
-
-    const validatedTree = getValidatedTree(
+    console.log("VALIDATIONNNNN from spot b", updatedWidgets);
+    const validatedTree = evaluatedTree;
+    /** getValidatedTree(
       this.widgetConfigMap,
       evaluatedTree,
       updatedWidgets,
-    );
+    );*/
     const validateEnd = performance.now();
 
     // Remove functions
@@ -511,6 +524,11 @@ export class DataTreeEvaluator {
     sortedDependencies: Array<string>,
   ): DataTree {
     const tree = _.cloneDeep(oldUnevalTree);
+    console.log(
+      "VALIDATIONNNN, evaluateTree called ",
+      tree,
+      sortedDependencies,
+    );
     try {
       return sortedDependencies.reduce(
         (currentTree: DataTree, propertyPath: string) => {
