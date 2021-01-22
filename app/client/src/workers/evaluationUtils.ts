@@ -6,6 +6,7 @@ import { VALIDATORS } from "./validations";
 import { Diff } from "deep-diff";
 import {
   DataTree,
+  DataTreeAction,
   DataTreeEntity,
   DataTreeWidget,
   ENTITY_TYPE,
@@ -148,7 +149,7 @@ export const addDependantsOfNestedPropertyPaths = (
   return [...withNestedPaths.values()];
 };
 
-export function isWidget(entity: DataTreeEntity): boolean {
+export function isWidget(entity: DataTreeEntity): entity is DataTreeWidget {
   return (
     typeof entity === "object" &&
     "ENTITY_TYPE" in entity &&
@@ -156,7 +157,7 @@ export function isWidget(entity: DataTreeEntity): boolean {
   );
 }
 
-export function isAction(entity: DataTreeEntity): boolean {
+export function isAction(entity: DataTreeEntity): entity is DataTreeAction {
   return (
     typeof entity === "object" &&
     "ENTITY_TYPE" in entity &&
@@ -256,20 +257,29 @@ export function validateWidgetProperty(
 export function getValidatedTree(
   widgetConfigMap: WidgetTypeConfigMap,
   tree: DataTree,
-  only?: Set<string>,
+  onlyPaths?: Set<string>,
 ) {
+  const only = new Set();
+
+  onlyPaths &&
+    onlyPaths.forEach((path) => {
+      only.add(path.split(".")[0]);
+    });
   return Object.keys(tree).reduce((tree, entityKey: string) => {
     if (only && only.size) {
       if (!only.has(entityKey)) {
         return tree;
       }
     }
-    const entity = tree[entityKey] as DataTreeWidget;
+    const entity = tree[entityKey];
     if (!isWidget(entity)) {
       return tree;
     }
     const parsedEntity = { ...entity };
     Object.keys(entity).forEach((property: string) => {
+      if (onlyPaths && onlyPaths.has(`${entityKey}.${property}`)) {
+        return;
+      }
       const validationProperties = widgetConfigMap[entity.type].validations;
 
       if (property in validationProperties) {

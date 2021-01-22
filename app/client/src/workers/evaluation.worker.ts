@@ -344,12 +344,11 @@ export class DataTreeEvaluator {
       subTreeSortOrder.map((path) => path.split(".")[0]),
     );
     console.log("VALIDATIONNNNN from spot b", updatedWidgets);
-    const validatedTree = evaluatedTree;
-    /** getValidatedTree(
+    const validatedTree = getValidatedTree(
       this.widgetConfigMap,
       evaluatedTree,
-      updatedWidgets,
-    );*/
+      new Set(subTreeSortOrder),
+    );
     const validateEnd = performance.now();
 
     // Remove functions
