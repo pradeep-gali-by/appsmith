@@ -4,9 +4,7 @@ import { withRouter, RouteComponentProps } from "react-router-dom";
 import { reduxForm, InjectedFormProps, formValueSelector } from "redux-form";
 import StyledForm from "components/editorComponents/Form";
 import {
-  AuthCardContainer,
   AuthCardHeader,
-  AuthCardBody,
   FormActions,
   AuthCardNavLink,
 } from "./StyledComponents";
@@ -24,9 +22,9 @@ import {
 import { AUTH_LOGIN_URL } from "constants/routes";
 import FormMessage from "components/editorComponents/form/FormMessage";
 import { FORGOT_PASSWORD_FORM_NAME } from "constants/forms";
-import FormGroup from "components/editorComponents/form/FormGroup";
-import Button from "components/editorComponents/Button";
-import FormTextField from "components/editorComponents/form/FormTextField";
+import FormGroup from "components/ads/formFields/FormGroup";
+import Button, { Size } from "components/ads/Button";
+import FormTextField from "components/ads/formFields/TextField";
 import { isEmail, isEmptyString } from "utils/formhelpers";
 import {
   ForgotPasswordFormValues,
@@ -62,7 +60,7 @@ export const ForgotPassword = (props: ForgotPasswordProps) => {
   } = props;
 
   return (
-    <AuthCardContainer>
+    <>
       {submitSucceeded && (
         <FormMessage
           intent="primary"
@@ -91,35 +89,34 @@ export const ForgotPassword = (props: ForgotPasswordProps) => {
         <h1>{FORGOT_PASSWORD_PAGE_TITLE}</h1>
         <h5>{FORGOT_PASSWORD_PAGE_SUBTITLE}</h5>
       </AuthCardHeader>
-      <AuthCardBody>
-        <StyledForm onSubmit={handleSubmit(forgotPasswordSubmitHandler)}>
-          <FormGroup
-            intent={error ? "danger" : "none"}
-            label={FORGOT_PASSWORD_PAGE_EMAIL_INPUT_LABEL}
-          >
-            <FormTextField
-              name="email"
-              placeholder={FORGOT_PASSWORD_PAGE_EMAIL_INPUT_PLACEHOLDER}
-              disabled={submitting}
-            />
-          </FormGroup>
-          <FormActions>
-            <Button
-              type="submit"
-              text={FORGOT_PASSWORD_PAGE_SUBMIT_BUTTON_TEXT}
-              intent="primary"
-              filled
-              size="large"
-              disabled={!isEmail(props.emailValue)}
-              loading={submitting}
-            />
-          </FormActions>
-        </StyledForm>
-      </AuthCardBody>
+      <StyledForm onSubmit={handleSubmit(forgotPasswordSubmitHandler)}>
+        <FormGroup
+          intent={error ? "danger" : "none"}
+          label={FORGOT_PASSWORD_PAGE_EMAIL_INPUT_LABEL}
+        >
+          <FormTextField
+            name="email"
+            placeholder={FORGOT_PASSWORD_PAGE_EMAIL_INPUT_PLACEHOLDER}
+            disabled={submitting}
+          />
+        </FormGroup>
+        <FormActions>
+          <Button
+            tag="button"
+            type="submit"
+            text={FORGOT_PASSWORD_PAGE_SUBMIT_BUTTON_TEXT}
+            // intent="primary"
+            fill
+            size={Size.large}
+            disabled={!isEmail(props.emailValue)}
+            // loading={submitting}
+          />
+        </FormActions>
+      </StyledForm>
       <AuthCardNavLink to={AUTH_LOGIN_URL}>
         {FORGOT_PASSWORD_PAGE_LOGIN_LINK}
       </AuthCardNavLink>
-    </AuthCardContainer>
+    </>
   );
 };
 

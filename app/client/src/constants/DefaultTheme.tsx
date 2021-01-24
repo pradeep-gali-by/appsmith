@@ -60,6 +60,13 @@ export const scrollbarDark = css`
   }
 `;
 
+export const getTypographyByKey = (props: Record<string, any>, key: string) => `
+  font-weight: ${props.theme.typography[key].fontWeight};
+  font-size: ${props.theme.typography[key].fontSize}px;
+  line-height: ${props.theme.typography[key].lineHeight}px;
+  letter-spacing: ${props.theme.typography[key].letterSpacing}px;
+`;
+
 export const BlueprintControlTransform = css`
   && {
     .${Classes.CONTROL} {
@@ -735,6 +742,20 @@ type ColorType = {
     bg: ShadeColor;
   };
   floatingBtn: any;
+  auth: any;
+};
+
+const auth: any = {
+  background: darkShades[1],
+  cardBackground: lightShades[10],
+  btnPrimary: "#F86A2B",
+  inputBackground: darkShades[1],
+  headingText: "#FFF",
+  link: "#457AE6",
+  text: darkShades[7],
+  placeholder: darkShades[5],
+  socialBtnText: darkShades[8],
+  socialBtnBorder: darkShades[8],
 };
 
 export const dark: ColorType = {
@@ -862,9 +883,9 @@ export const dark: ColorType = {
       border: darkShades[2],
     },
     normal: {
-      bg: lightShades[10],
-      text: darkShades[9],
+      bg: darkShades[0],
       border: darkShades[0],
+      text: darkShades[7],
     },
     placeholder: darkShades[5],
     readOnly: {
@@ -1019,6 +1040,7 @@ export const dark: ColorType = {
     backgroundColor: darkShades[3],
     iconColor: darkShades[6],
   },
+  auth,
 };
 
 export const light: ColorType = {
@@ -1303,6 +1325,7 @@ export const light: ColorType = {
     backgroundColor: lightShades[3],
     iconColor: lightShades[7],
   },
+  auth,
 };
 
 export const theme: Theme = {
@@ -1394,6 +1417,18 @@ export const theme: Theme = {
       lineHeight: 23,
       letterSpacing: -0.24,
       fontWeight: "normal",
+    },
+    authCardHeader: {
+      fontStyle: "normal",
+      fontWeight: 600,
+      fontSize: 24,
+      lineHeight: 20,
+    },
+    authCardSubheader: {
+      fontStyle: "normal",
+      fontWeight: "normal",
+      fontSize: 14,
+      lineHeight: 20,
     },
   },
   iconSizes: {
@@ -1545,7 +1580,7 @@ export const theme: Theme = {
     },
   },
   authCard: {
-    width: 612,
+    width: 400,
     borderRadius: 16,
     background: Colors.WHITE,
     padding: 40,
