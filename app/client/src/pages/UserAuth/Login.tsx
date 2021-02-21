@@ -51,7 +51,11 @@ import { LOGIN_SUBMIT_PATH } from "constants/ApiConstants";
 import PerformanceTracker, {
   PerformanceTransactionName,
 } from "utils/PerformanceTracker";
-const { enableGithubOAuth, enableGoogleOAuth } = getAppsmithConfigs();
+const {
+  enableGithubOAuth,
+  enableGoogleOAuth,
+  enableOIDCProviderOAuth,
+} = getAppsmithConfigs();
 
 const validate = (values: LoginFormValues) => {
   const errors: LoginFormValues = {};
@@ -79,6 +83,7 @@ type LoginFormProps = { emailValue: string } & InjectedFormProps<
 const SocialLoginList: string[] = [];
 if (enableGithubOAuth) SocialLoginList.push(SocialLoginTypes.GITHUB);
 if (enableGoogleOAuth) SocialLoginList.push(SocialLoginTypes.GOOGLE);
+if (enableOIDCProviderOAuth) SocialLoginList.push(SocialLoginTypes.OIDC);
 
 export const Login = (props: LoginFormProps) => {
   const { error, valid } = props;

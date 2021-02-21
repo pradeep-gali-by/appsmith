@@ -54,6 +54,7 @@ export type AppsmithUIConfigs = {
   enableRapidAPI: boolean;
   enableGoogleOAuth: boolean;
   enableGithubOAuth: boolean;
+  enableOIDCProviderOAuth: boolean;
   enableMixpanel: boolean;
   enableTNCPP: boolean;
 

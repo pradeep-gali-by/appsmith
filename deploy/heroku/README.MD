@@ -27,6 +27,10 @@ Quickly set up Appsmith to explore product functionality using Heroku.
       - Github Oauth:
         - `APPSMITH_OAUTH2_GITHUB_CLIENT_ID`: Client ID provided by Github for OAuth2 login
         - `APPSMITH_OAUTH2_GITHUB_CLIENT_SECRET`: Client secret provided by Github for OAuth2 login
+      - OIDC Provideer Oauth:
+        - `APPSMITH_OAUTH2_OIDC_CLIENT_ID`: Client ID provided by OIDC Provider for OAuth2 login
+        - `APPSMITH_OAUTH2_OIDC_CLIENT_SECRET`: Client secret provided by OIDC Provider for OAuth2 login
+        - `APPSMITH_OAUTH2_OIDC_ISSUER_URL`: Issuer URL provided by OIDC Provider for OAuth2 login. ex: https://login.microsoftonline.com/{tenant-id}/v2.0 for Azure AD App
     - `APPSMITH_GOOGLE_MAPS_API_KEY`: Google Maps API key which is required if you wish to leverage Google Maps widget. Read more at: https://docs.appsmith.com/third-party-services/google-maps
     - `APPSMITH_DISABLE_TELEMETRY`: We want to be transparent and request that you share anonymous usage data with us. This data is purely statistical in nature and helps us understand your needs & provide better support to your self-hosted instance. You can read more about what information is collected in our documentation https://docs.appsmith.com/telemetry/telemetry
 

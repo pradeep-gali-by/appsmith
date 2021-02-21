@@ -58,11 +58,12 @@ const {
   enableGithubOAuth,
   enableGoogleOAuth,
   enableTNCPP,
+  enableOIDCProviderOAuth,
 } = getAppsmithConfigs();
 const SocialLoginList: string[] = [];
 if (enableGithubOAuth) SocialLoginList.push(SocialLoginTypes.GITHUB);
 if (enableGoogleOAuth) SocialLoginList.push(SocialLoginTypes.GOOGLE);
-
+if (enableOIDCProviderOAuth) SocialLoginList.push(SocialLoginTypes.OIDC);
 export const TncPPLinks = () => {
   if (!enableTNCPP) return null;
   return (

@@ -34,6 +34,11 @@ APPSMITH_MAIL_ENABLED=false
 # APPSMITH_OAUTH2_GITHUB_CLIENT_SECRET=
 # *********************************
 
+# ********* OIDC OAUth **********
+# APPSMITH_OAUTH2_OIDC_CLIENT_ID=
+# APPSMITH_OAUTH2_OIDC_CLIENT_SECRET=
+# *********************************
+
 # ******** Google Maps ***********
 # APPSMITH_GOOGLE_MAPS_API_KEY=
 # ********************************

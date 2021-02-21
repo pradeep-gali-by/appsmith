@@ -93,6 +93,16 @@
         "value": "",
         "required": false
       },
+      "APPSMITH_OAUTH2_OIDC_CLIENT_ID": {
+        "description" : "Client ID provided by OIDC PROVIDER for OAuth2 login",
+        "value": "",
+        "required": false
+      },
+      "APPSMITH_OAUTH2_OIDC_CLIENT_SECRET": {
+        "description" : "Client secret provided by OIDC PROVIDER for OAuth2 login",
+        "value": "",
+        "required": false
+      },
       "APPSMITH_GOOGLE_MAPS_API_KEY": {
         "description" : "Google Maps API key which is required if you wish to leverage Google Maps widget. Read more at: https://docs.appsmith.com/third-party-services/google-maps",
         "value": "",

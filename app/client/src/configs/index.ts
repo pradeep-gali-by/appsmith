@@ -15,6 +15,7 @@ type INJECTED_CONFIGS = {
   };
   enableGoogleOAuth: boolean;
   enableGithubOAuth: boolean;
+  enableOIDCProviderOAuth: boolean;
   enableRapidAPI: boolean;
   segment: {
     apiKey: string;
@@ -67,6 +68,9 @@ const getConfigsFromEnvVars = (): INJECTED_CONFIGS => {
     smartLook: {
       id: process.env.REACT_APP_SMART_LOOK_ID || "",
     },
+    enableOIDCProviderOAuth: process.env.REACT_APP_OAUTH2_OIDC_CLIENT_ID
+      ? process.env.REACT_APP_OAUTH2_OIDC_CLIENT_ID.length > 0
+      : false,
     enableGoogleOAuth: process.env.REACT_APP_OAUTH2_GOOGLE_CLIENT_ID
       ? process.env.REACT_APP_OAUTH2_GOOGLE_CLIENT_ID.length > 0
       : false,
@@ -243,6 +247,9 @@ export const getAppsmithConfigs = (): AppsmithUIConfigs => {
     },
     enableRapidAPI:
       ENV_CONFIG.enableRapidAPI || APPSMITH_FEATURE_CONFIGS.enableRapidAPI,
+    enableOIDCProviderOAuth:
+      ENV_CONFIG.enableOIDCProviderOAuth ||
+      APPSMITH_FEATURE_CONFIGS.enableOIDCProviderOAuth,
     enableGithubOAuth:
       ENV_CONFIG.enableGithubOAuth ||
       APPSMITH_FEATURE_CONFIGS.enableGithubOAuth,

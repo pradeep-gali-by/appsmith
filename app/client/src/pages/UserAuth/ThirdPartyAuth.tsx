@@ -64,6 +64,7 @@ const StyledSocialLoginButton = styled.a`
 export const SocialLoginTypes: Record<string, string> = {
   GOOGLE: "google",
   GITHUB: "github",
+  OIDC: "oidc",
 };
 
 type SignInType = "SIGNIN" | "SIGNUP";
