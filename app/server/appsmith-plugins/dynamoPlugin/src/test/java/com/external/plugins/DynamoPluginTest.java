@@ -4,6 +4,7 @@ import com.appsmith.external.models.ActionConfiguration;
 import com.appsmith.external.models.ActionExecutionResult;
 import com.appsmith.external.models.DBAuth;
 import com.appsmith.external.models.DatasourceConfiguration;
+import com.appsmith.external.models.DatasourceStructure;
 import com.appsmith.external.models.Endpoint;
 import lombok.extern.log4j.Log4j;
 import org.junit.BeforeClass;
@@ -26,9 +27,11 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -91,8 +94,6 @@ public class DynamoPluginTest {
                 ))
                 .build());
 
-        System.out.println(ddb.listTables());
-
         Endpoint endpoint = new Endpoint();
         endpoint.setHost(host);
         endpoint.setPort(port.longValue());
@@ -125,6 +126,23 @@ public class DynamoPluginTest {
                             new String[]{"cities"},
                             ((Map<String, List<String>>) result.getBody()).get("TableNames").toArray()
                     );
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testDescribeTable() {
+        final String body = "{\n" +
+                "  \"TableName\": \"cities\"\n" +
+                "}\n";
+
+        StepVerifier.create(execute("DescribeTable", body))
+                .assertNext(result -> {
+                    assertNotNull(result);
+                    assertTrue(result.getIsExecutionSuccess());
+                    assertNotNull(result.getBody());
+                    final Map<String, Object> table =  ((Map<String, Map<String, Object>>) result.getBody()).get("Table");
+                    assertEquals("cities", table.get("TableName"));
                 })
                 .verifyComplete();
     }
@@ -200,6 +218,111 @@ public class DynamoPluginTest {
                     assertNotNull(result.getBody());
                     final Map<String, Map<String, Object>> attributes = ((Map<String, Map<String, Map<String, Object>>>) result.getBody()).get("Attributes");
                     assertEquals("Bengaluru", attributes.get("City").get("S"));
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testScan() {
+        final String body = "{\n" +
+                "  \"TableName\": \"cities\"\n" +
+                "}\n";
+
+        StepVerifier.create(execute("Scan", body))
+                .assertNext(result -> {
+                    assertNotNull(result);
+                    assertTrue(result.getIsExecutionSuccess());
+                    assertNotNull(result.getBody());
+                    final List<Object> items = (List<Object>) ((Map<String, Object>) result.getBody()).get("Items");
+                    assertEquals(2, items.size());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testBatchGetItem() {
+        final String body = "{\n" +
+                "    \"RequestItems\": {\n" +
+                "        \"cities\": {\n" +
+                "            \"Keys\": [\n" +
+                "                {\n" +
+                "                    \"Id\": {\n" +
+                "                       \"S\": \"1\"\n" +
+                "                    }\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"Id\": {\n" +
+                "                       \"S\": \"2\"\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            ],\n" +
+                "            \"ProjectionExpression\":\"City\"\n" +
+                "        }\n" +
+                "    },\n" +
+                "    \"ReturnConsumedCapacity\": \"TOTAL\"\n" +
+                "}";
+
+        StepVerifier.create(execute("BatchGetItem", body))
+                .assertNext(result -> {
+                    assertNotNull(result);
+                    assertTrue(result.getIsExecutionSuccess());
+                    final Map<String, ?> response = (Map) result.getBody();
+                    assertEquals(
+                            Collections.emptyMap(),
+                            response.remove("UnprocessedKeys")
+                    );
+                    final List<Map<String, Map<String, String>>> items = (List<Map<String, Map<String, String>>>) ((Map) response.get("Responses")).get("cities");
+                    assertEquals("New Delhi", items.get(0).get("City").get("S"));
+                    assertEquals("Bengaluru", items.get(1).get("City").get("S"));
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testTransactGetItems() {
+        final String body =
+                "{\n" +
+                "  \"ReturnConsumedCapacity\": \"NONE\",\n" +
+                "  \"TransactItems\": [\n" +
+                "    {\n" +
+                "      \"Get\": {\n" +
+                "        \"Key\": {\n" +
+                "          \"Id\": {\n" +
+                "            \"S\": \"1\"\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"TableName\": \"cities\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        StepVerifier.create(execute("TransactGetItems", body))
+                .assertNext(result -> {
+                    assertNotNull(result);
+                    assertTrue(result.getIsExecutionSuccess());
+                    final Map<String, ?> response = (Map) result.getBody();
+                    assertEquals("New Delhi", ((List<Map<String, Map<String, Map<String, String>>>>) response.get("Responses")).get(0).get("Item").get("City").get("S"));
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testStructure() {
+        final Mono<DatasourceStructure> structureMono = pluginExecutor
+                .datasourceCreate(dsConfig)
+                .flatMap(conn -> pluginExecutor.getStructure(conn, dsConfig));
+
+        StepVerifier.create(structureMono)
+                .assertNext(structure -> {
+                    assertNotNull(structure);
+                    assertNotNull(structure.getTables());
+                    assertEquals(
+                            List.of("cities"),
+                            structure.getTables().stream()
+                                    .map(DatasourceStructure.Table::getName)
+                                    .collect(Collectors.toList())
+                    );
                 })
                 .verifyComplete();
     }
