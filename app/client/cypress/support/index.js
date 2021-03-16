@@ -49,7 +49,7 @@ before(function() {
 
   cy.generateUUID().then((id) => {
     appId = id;
-    cy.CreateAppInFirstListedOrg(id);
+    cy.CreateApp(id);
     localStorage.setItem("AppName", appId);
   });
 

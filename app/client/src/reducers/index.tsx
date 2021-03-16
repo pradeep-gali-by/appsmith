@@ -7,6 +7,7 @@ import { CanvasWidgetsReduxState } from "./entityReducers/canvasWidgetsReducer";
 import { EditorReduxState } from "./uiReducers/editorReducer";
 import { ErrorReduxState } from "./uiReducers/errorReducer";
 import { ActionDataState } from "./entityReducers/actionsReducer";
+import { PropertyPaneConfigState } from "./entityReducers/propertyPaneConfigReducer";
 import { PropertyPaneReduxState } from "./uiReducers/propertyPaneReducer";
 import { WidgetConfigReducerState } from "./entityReducers/widgetConfigReducer";
 import { WidgetSidebarReduxState } from "./uiReducers/widgetSidebarReducer";
@@ -82,6 +83,7 @@ export interface AppState {
   entities: {
     canvasWidgets: CanvasWidgetsReduxState;
     actions: ActionDataState;
+    propertyConfig: PropertyPaneConfigState;
     widgetConfig: WidgetConfigReducerState;
     datasources: DatasourceDataState;
     pageList: PageListReduxState;

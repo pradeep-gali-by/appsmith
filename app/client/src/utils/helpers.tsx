@@ -1,7 +1,6 @@
 import { GridDefaults } from "constants/WidgetConstants";
 import lottie from "lottie-web";
-import confetti from "assets/lottie/binding.json";
-import successAnimation from "assets/lottie/success-animation.json";
+import confetti from "assets/lottie/confetti.json";
 import {
   DATA_TREE_KEYWORDS,
   JAVASCRIPT_KEYWORDS,
@@ -195,36 +194,9 @@ export const isNameValid = (
   );
 };
 
-/**
- * checks if variable passed is of type string or not
- *
- * for e.g -> 'Pawan' -> true
- * ['Pawan', 'Goku'] -> false
- * { name: "Pawan"} -> false
- */
-export const isString = (str: any) => {
-  return typeof str === "string" || str instanceof String;
-};
-
 export const playOnboardingAnimation = () => {
-  playLottieAnimation("#root", confetti);
-};
+  const container: Element = document.getElementById("root") as Element;
 
-export const playOnboardingStepCompletionAnimation = () => {
-  playLottieAnimation(".onboarding-step-indicator", successAnimation, {
-    "background-color": "white",
-    padding: "60px",
-  });
-};
-
-const playLottieAnimation = (
-  selector: string,
-  animation: any,
-  styles?: any,
-) => {
-  const container: Element = document.querySelector(selector) as Element;
-
-  if (!container) return;
   const el = document.createElement("div");
   Object.assign(el.style, {
     position: "absolute",
@@ -235,20 +207,19 @@ const playLottieAnimation = (
     "z-index": 99,
     width: "100%",
     height: "100%",
-    ...styles,
   });
 
   container.appendChild(el);
 
   const animObj = lottie.loadAnimation({
     container: el,
-    animationData: animation,
+    animationData: confetti,
     loop: false,
   });
-
   const duration = (animObj.totalFrames / animObj.frameRate) * 1000;
 
   animObj.play();
+
   setTimeout(() => {
     container.removeChild(el);
   }, duration);

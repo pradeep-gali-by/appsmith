@@ -34,7 +34,6 @@ import { AppState } from "reducers";
 import {
   FetchApplicationPayload,
   setDefaultApplicationPageSuccess,
-  resetCurrentApplication,
 } from "actions/applicationActions";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import {
@@ -381,8 +380,6 @@ export function* createApplicationSaga(
         },
       });
     } else {
-      yield put(resetCurrentApplication());
-
       const request: CreateApplicationRequest = {
         name: applicationName,
         icon: icon,

@@ -25,48 +25,7 @@ const MODAL_SIZE: { [id: string]: { width: number; height: number } } = {
   },
 };
 
-export class ModalWidget extends BaseWidget<ModalWidgetProps, WidgetState> {
-  static getPropertyPaneConfig() {
-    return [
-      {
-        sectionName: "General",
-        children: [
-          {
-            propertyName: "canOutsideClickClose",
-            label: "Quick Dismiss",
-            helpText: "Allows dismissing the modal when user taps outside",
-            controlType: "SWITCH",
-            isBindProperty: false,
-            isTriggerProperty: false,
-          },
-          {
-            propertyName: "size",
-            label: "Modal Type",
-            controlType: "DROP_DOWN",
-            options: [
-              {
-                label: "Form Modal",
-                value: "MODAL_LARGE",
-              },
-              {
-                label: "Alert Modal",
-                value: "MODAL_SMALL",
-              },
-            ],
-            isBindProperty: false,
-            isTriggerProperty: false,
-          },
-          {
-            propertyName: "shouldScrollContents",
-            label: "Scroll Contents",
-            controlType: "SWITCH",
-            isBindProperty: false,
-            isTriggerProperty: false,
-          },
-        ],
-      },
-    ];
-  }
+class ModalWidget extends BaseWidget<ModalWidgetProps, WidgetState> {
   static defaultProps = {
     isOpen: true,
     canEscapeKeyClose: false,

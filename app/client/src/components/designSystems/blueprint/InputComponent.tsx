@@ -1,10 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import {
-  getBorderCSSShorthand,
-  IntentColors,
-  labelStyle,
-} from "constants/DefaultTheme";
+import { IntentColors, labelStyle } from "constants/DefaultTheme";
 import { ComponentProps } from "components/designSystems/appsmith/BaseComponent";
 import {
   Intent,
@@ -43,7 +39,7 @@ const InputComponentWrapper = styled((props) => (
       border: 1px solid;
       border-color: ${({ hasError }) =>
         hasError ? IntentColors.danger : Colors.GEYSER_LIGHT};
-      border-radius: 0;
+      border-radius: ${(props) => props.theme.radii[1]}px;
       height: ${(props) => (props.multiline === "true" ? "100%" : "inherit")};
       width: 100%;
       ${(props) =>
@@ -53,7 +49,6 @@ const InputComponentWrapper = styled((props) => (
         border-bottom-right-radius: 0px;
         border-right-width: 0px;
       `}
-      transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
       &:active {
         border-color: ${({ hasError }) =>
           hasError ? IntentColors.danger : Colors.HIT_GRAY};
@@ -61,13 +56,6 @@ const InputComponentWrapper = styled((props) => (
       &:focus {
         border-color: ${({ hasError }) =>
           hasError ? IntentColors.danger : Colors.MYSTIC};
-
-        &:focus {
-          border: ${(props) => getBorderCSSShorthand(props.theme.borders[2])};
-          border-color: #80bdff;
-          outline: 0;
-          box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25);
-        }
       }
     }
     .${Classes.INPUT_GROUP} {
@@ -148,22 +136,6 @@ class InputComponent extends React.Component<
         return "text";
     }
   }
-  onKeyDownTextArea = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const isEnterKey = e.key === "Enter" || e.keyCode === 13;
-    const { disableNewLineOnPressEnterKey } = this.props;
-    if (isEnterKey && disableNewLineOnPressEnterKey && !e.shiftKey) {
-      e.preventDefault();
-    }
-    if (typeof this.props.onKeyDown === "function") {
-      this.props.onKeyDown(e);
-    }
-  };
-  onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (typeof this.props.onKeyDown === "function") {
-      this.props.onKeyDown(e);
-    }
-  };
-
   private numericInputComponent = () => (
     <NumericInput
       value={this.props.value}
@@ -183,7 +155,6 @@ class InputComponent extends React.Component<
       stepSize={this.props.stepSize}
       onFocus={() => this.setFocusState(true)}
       onBlur={() => this.setFocusState(false)}
-      onKeyDown={this.onKeyDown}
     />
   );
   private textAreaInputComponent = () => (
@@ -198,7 +169,6 @@ class InputComponent extends React.Component<
       growVertically={false}
       onFocus={() => this.setFocusState(true)}
       onBlur={() => this.setFocusState(false)}
-      onKeyDown={this.onKeyDownTextArea}
     />
   );
 
@@ -229,7 +199,6 @@ class InputComponent extends React.Component<
         type={this.getType(this.props.inputType)}
         onFocus={() => this.setFocusState(true)}
         onBlur={() => this.setFocusState(false)}
-        onKeyDown={this.onKeyDown}
       />
     );
   private renderInputComponent = (inputType: InputType, isTextArea: boolean) =>
@@ -298,12 +267,6 @@ export interface InputComponentProps extends ComponentProps {
   isInvalid: boolean;
   showError: boolean;
   onFocusChange: (state: boolean) => void;
-  disableNewLineOnPressEnterKey?: boolean;
-  onKeyDown?: (
-    e:
-      | React.KeyboardEvent<HTMLTextAreaElement>
-      | React.KeyboardEvent<HTMLInputElement>,
-  ) => void;
 }
 
 export default InputComponent;

@@ -218,26 +218,7 @@ class ChartDataControl extends BaseControl<ControlProps> {
     );
 
     const evaluatedValue = this.getEvaluatedValue();
-    if (this.props.widgetProperties.chartType === "PIE_CHART") {
-      const data = chartData.length
-        ? chartData[0]
-        : {
-            seriesName: "",
-            data: "",
-          };
-      return (
-        <DataControlComponent
-          index={0}
-          item={data}
-          length={1}
-          deleteOption={this.deleteOption}
-          updateOption={this.updateOption}
-          isValid={validations[0].isValid}
-          validationMessage={validations[0].validationMessage}
-          evaluated={evaluatedValue[0]}
-        />
-      );
-    }
+
     return (
       <React.Fragment>
         {chartData.map((data, index) => {
@@ -301,14 +282,8 @@ class ChartDataControl extends BaseControl<ControlProps> {
       seriesName: string;
       data: string;
     }> = this.props.propertyValue;
-    const updatedChartData = [
-      ...chartData,
-      {
-        seriesName: "",
-        data: JSON.stringify([{ x: "label", y: 50 }]),
-      },
-    ];
-    this.updateProperty(this.props.propertyName, updatedChartData);
+    chartData.push({ seriesName: "", data: '[{ "x": "label", "y": 50 }]' });
+    this.updateProperty(this.props.propertyName, chartData);
   };
 
   static getControlType() {

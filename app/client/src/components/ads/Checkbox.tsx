@@ -1,23 +1,18 @@
-import { Classes, CommonComponentProps } from "./common";
+import { CommonComponentProps } from "./common";
 import React, { useState } from "react";
 import styled from "styled-components";
-import Text, { TextType } from "./Text";
-import { Colors } from "constants/Colors";
 
-export type CheckboxProps = CommonComponentProps & {
+type CheckboxProps = CommonComponentProps & {
   label: string;
-  isDefaultChecked?: boolean;
   onCheckChange?: (isChecked: boolean) => void;
-  info?: string;
 };
 
 const Checkmark = styled.span<{
   disabled?: boolean;
   isChecked?: boolean;
-  info?: string;
 }>`
   position: absolute;
-  top: ${(props) => (props.info ? "6px" : "1px")};
+  top: 1px;
   left: 0;
   width: ${(props) => props.theme.spaces[8]}px;
   height: ${(props) => props.theme.spaces[8]}px;
@@ -60,6 +55,10 @@ const StyledCheckbox = styled.label<{
   display: block;
   width: 100%;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  font-weight: ${(props) => props.theme.typography.p1.fontWeight};
+  font-size: ${(props) => props.theme.typography.p1.fontSize}px;
+  line-height: ${(props) => props.theme.typography.p1.lineHeight}px;
+  letter-spacing: ${(props) => props.theme.typography.p1.letterSpacing}px;
   color: ${(props) => props.theme.colors.checkbox.labelColor};
   padding-left: ${(props) => props.theme.spaces[12] - 2}px;
 
@@ -76,27 +75,8 @@ const StyledCheckbox = styled.label<{
   }
 `;
 
-const LabelContainer = styled.div<{ info?: string }>`
-  display: flex;
-  flex-direction: column;
-  .${Classes.TEXT}:first-child {
-    color: ${(props) => props.theme.colors.apiPane.settings.textColor};
-  }
-  ${(props) =>
-    props.info
-      ? `
-    .${Classes.TEXT}:last-child {
-    color: ${Colors.DOVE_GRAY};
-    margin-top: 4px;
-  }
-  `
-      : null}
-`;
-
 const Checkbox = (props: CheckboxProps) => {
-  const [checked, setChecked] = useState<boolean>(
-    props.isDefaultChecked || false,
-  );
+  const [checked, setChecked] = useState<boolean>(false);
 
   const onChangeHandler = (checked: boolean) => {
     setChecked(checked);
@@ -105,10 +85,7 @@ const Checkbox = (props: CheckboxProps) => {
 
   return (
     <StyledCheckbox data-cy={props.cypressSelector} disabled={props.disabled}>
-      <LabelContainer info={props.info}>
-        <Text type={TextType.P1}>{props.label}</Text>
-        {props.info ? <Text type={TextType.P3}>{props.info}</Text> : null}
-      </LabelContainer>
+      {props.label}
       <input
         type="checkbox"
         disabled={props.disabled}
@@ -117,11 +94,7 @@ const Checkbox = (props: CheckboxProps) => {
           onChangeHandler(e.target.checked)
         }
       />
-      <Checkmark
-        disabled={props.disabled}
-        isChecked={checked}
-        info={props.info}
-      />
+      <Checkmark disabled={props.disabled} isChecked={checked} />
     </StyledCheckbox>
   );
 };

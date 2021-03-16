@@ -6,7 +6,6 @@
     "nameOfApi": ".t--nameOfApi",
     "ApiNameField": ".t--action-name-edit-field",
     "addToPageBtn": ".t--addToPageBtn",
-    "ApiActionMenu": ".t--more-action-menu",
     "ApiDeleteBtn": ".t--apiFormDeleteBtn",
     "ApiRunBtn": ".t--apiFormRunBtn",
     "addToPageBtnsId": ".t--addToPageButtons",
@@ -14,13 +13,12 @@
     "formActionButtons": ".t--formActionButtons",
     "dataSourceField": ".t--dataSourceField",
     "responseBody": ".CodeMirror-code  span.cm-string.cm-property",
-    "ApiVerb": ".t--apiFormHttpMethod",
+    "ApiVerb": ".t--apiFormHttpMethod input",
     "apiPaginationNextText": ".t--apiFormPaginationNext",
     "apiPaginationPrevText": ".t--apiFormPaginationPrev",
     "apiPaginationPrevTest": ".t--apiFormPaginationPrevTest",
     "apiPaginationNextTest": ".t--apiFormPaginationNextTest",
     "apiPaginationTab": ".t--apiFormPaginationType",
     "apiTab": ".react-tabs__tab-list li",
-    "bodyType": ".t--apiFormPostBodyType",
-    "bodyTab": "Body"
+    "bodyType": ".t--apiFormPostBodyType"
 }

@@ -46,7 +46,7 @@ import { getInitialsAndColorCode } from "utils/AppsmithUtils";
 import AnalyticsUtil, { EventLocation } from "utils/AnalyticsUtil";
 import { CURL } from "constants/ApiConstants";
 import { getAppsmithConfigs } from "configs";
-import { getAppCardColorPalette } from "selectors/themeSelectors";
+import { getThemeDetails } from "selectors/themeSelectors";
 const { enableRapidAPI } = getAppsmithConfigs();
 
 const SearchContainer = styled.div`
@@ -339,7 +339,7 @@ type ApiHomeScreenProps = {
   setCurrentCategory: (category: string) => void;
   previouslySetCategory: string;
   fetchProvidersError: boolean;
-  colorPalette: string[];
+  themeDetails: any;
 };
 
 type ApiHomeScreenState = {
@@ -522,7 +522,8 @@ class ApiHomeScreen extends React.Component<Props, ApiHomeScreenState> {
                                 style={{
                                   backgroundColor: getInitialsAndColorCode(
                                     providerSearchResult.name,
-                                    this.props.colorPalette,
+                                    this.props.themeDetails.theme.colors
+                                      .appCardColors,
                                   )[1],
                                   padding: 11,
                                   width: 60,
@@ -537,7 +538,8 @@ class ApiHomeScreen extends React.Component<Props, ApiHomeScreenState> {
                                   {
                                     getInitialsAndColorCode(
                                       providerSearchResult.name,
-                                      this.props.colorPalette,
+                                      this.props.themeDetails.theme.colors
+                                        .appCardColors,
                                     )[0]
                                   }
                                 </span>
@@ -723,7 +725,8 @@ class ApiHomeScreen extends React.Component<Props, ApiHomeScreenState> {
                                       style={{
                                         backgroundColor: getInitialsAndColorCode(
                                           provider.name,
-                                          this.props.colorPalette,
+                                          this.props.themeDetails.colors
+                                            .appCardColors,
                                         )[1],
                                       }}
                                     >
@@ -731,7 +734,8 @@ class ApiHomeScreen extends React.Component<Props, ApiHomeScreenState> {
                                         {
                                           getInitialsAndColorCode(
                                             provider.name,
-                                            this.props.colorPalette,
+                                            this.props.themeDetails.colors
+                                              .appCardColors,
                                           )[0]
                                         }
                                       </span>
@@ -802,7 +806,7 @@ const mapStateToProps = (state: AppState) => {
     previouslySetCategory: state.ui.apiPane.currentCategory,
     initialValues: { category: initialCategoryValue },
     fetchProvidersError,
-    colorPalette: getAppCardColorPalette(state),
+    themeDetails: getThemeDetails,
   };
 };
 

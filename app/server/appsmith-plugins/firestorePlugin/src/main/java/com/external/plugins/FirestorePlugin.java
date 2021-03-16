@@ -1,7 +1,5 @@
 package com.external.plugins;
 
-import com.appsmith.external.exceptions.pluginExceptions.AppsmithPluginError;
-import com.appsmith.external.exceptions.pluginExceptions.AppsmithPluginException;
 import com.appsmith.external.models.ActionConfiguration;
 import com.appsmith.external.models.ActionExecutionResult;
 import com.appsmith.external.models.DBAuth;
@@ -9,6 +7,8 @@ import com.appsmith.external.models.DatasourceConfiguration;
 import com.appsmith.external.models.DatasourceStructure;
 import com.appsmith.external.models.DatasourceTestResult;
 import com.appsmith.external.models.Property;
+import com.appsmith.external.pluginExceptions.AppsmithPluginError;
+import com.appsmith.external.pluginExceptions.AppsmithPluginException;
 import com.appsmith.external.plugins.BasePlugin;
 import com.appsmith.external.plugins.PluginExecutor;
 import com.google.api.core.ApiFuture;
@@ -18,6 +18,7 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.FirebaseApp;
@@ -78,14 +79,14 @@ public class FirestorePlugin extends BasePlugin {
 
             if (StringUtils.isBlank(path)) {
                 return Mono.error(new AppsmithPluginException(
-                        AppsmithPluginError.PLUGIN_EXECUTE_ARGUMENT_ERROR,
+                        AppsmithPluginError.PLUGIN_ERROR,
                         "Document/Collection path cannot be empty"
                 ));
             }
 
             if (path.startsWith("/") || path.endsWith("/")) {
                 return Mono.error(new AppsmithPluginException(
-                        AppsmithPluginError.PLUGIN_EXECUTE_ARGUMENT_ERROR,
+                        AppsmithPluginError.PLUGIN_ERROR,
                         "Firestore paths should not begin or end with `/` character."
                 ));
             }
@@ -97,7 +98,7 @@ public class FirestorePlugin extends BasePlugin {
 
             if (method == null) {
                 return Mono.error(new AppsmithPluginException(
-                        AppsmithPluginError.PLUGIN_EXECUTE_ARGUMENT_ERROR,
+                        AppsmithPluginError.PLUGIN_ERROR,
                         "Missing Firestore method."
                 ));
             }
@@ -114,7 +115,7 @@ public class FirestorePlugin extends BasePlugin {
                             return Mono.just(objectMapper.readValue(strBody, HashMap.class));
                         } catch (IOException e) {
                             return Mono.error(new AppsmithPluginException(
-                                    AppsmithPluginError.PLUGIN_EXECUTE_ARGUMENT_ERROR,
+                                    AppsmithPluginError.PLUGIN_ERROR,
                                     e.getMessage()
                             ));
                         }
@@ -122,7 +123,7 @@ public class FirestorePlugin extends BasePlugin {
                     .flatMap(mapBody -> {
                         if (mapBody.isEmpty() && method.isBodyNeeded()) {
                             return Mono.error(new AppsmithPluginException(
-                                    AppsmithPluginError.PLUGIN_EXECUTE_ARGUMENT_ERROR,
+                                    AppsmithPluginError.PLUGIN_ERROR,
                                     "The method " + method.toString() + " needs a non-empty body to work."
                             ));
                         }
@@ -277,7 +278,7 @@ public class FirestorePlugin extends BasePlugin {
                                     return Mono.just(query1.whereArrayContainsAny(queryFieldPath, parseList(queryValue)));
                                 } catch (IOException e) {
                                     return Mono.error(new AppsmithPluginException(
-                                            AppsmithPluginError.PLUGIN_EXECUTE_ARGUMENT_ERROR,
+                                            AppsmithPluginError.PLUGIN_ERROR,
                                             "Unable to parse condition value as a JSON list."
                                     ));
                                 }
@@ -286,7 +287,7 @@ public class FirestorePlugin extends BasePlugin {
                                     return Mono.just(query1.whereIn(queryFieldPath, parseList(queryValue)));
                                 } catch (IOException e) {
                                     return Mono.error(new AppsmithPluginException(
-                                            AppsmithPluginError.PLUGIN_EXECUTE_ARGUMENT_ERROR,
+                                            AppsmithPluginError.PLUGIN_ERROR,
                                             "Unable to parse condition value as a JSON list."
                                     ));
                                 }
@@ -358,10 +359,6 @@ public class FirestorePlugin extends BasePlugin {
         }
 
         private Object resultToMap(Object objResult) throws AppsmithPluginException {
-            return resultToMap(objResult, true);
-        }
-
-        private Object resultToMap(Object objResult, boolean isRoot) throws AppsmithPluginException {
             if (objResult instanceof WriteResult) {
                 WriteResult writeResult = (WriteResult) objResult;
                 Map<String, Object> resultMap = new HashMap<>();
@@ -369,53 +366,35 @@ public class FirestorePlugin extends BasePlugin {
                 return resultMap;
 
             } else if (objResult instanceof DocumentSnapshot) {
-                // Individual document.
                 DocumentSnapshot documentSnapshot = (DocumentSnapshot) objResult;
                 Map<String, Object> resultMap = new HashMap<>();
-                resultMap.put("_ref", resultToMap(documentSnapshot.getReference()));
                 if (documentSnapshot.getData() != null) {
-                    for (final Map.Entry<String, Object> entry : documentSnapshot.getData().entrySet()) {
-                        resultMap.put(entry.getKey(), resultToMap(entry.getValue(), false));
-                    }
+                    resultMap = documentSnapshot.getData();
                 }
                 return resultMap;
 
             } else if (objResult instanceof QuerySnapshot) {
-                // Result of a GET_COLLECTION operation.
-                return resultToMap(((QuerySnapshot) objResult).getDocuments());
+                QuerySnapshot querySnapshot = (QuerySnapshot) objResult;
+                List<Map<String, Object>> documents = new ArrayList<>();
+                for (QueryDocumentSnapshot documentSnapshot : querySnapshot.getDocuments()) {
+                    documents.add(documentSnapshot.getData());
+                }
+                return documents;
 
             } else if (objResult instanceof DocumentReference) {
-                // A reference containing details of another document.
                 DocumentReference documentReference = (DocumentReference) objResult;
-                return Map.of(
-                        "id", documentReference.getId(),
-                        "path", documentReference.getPath()
-                );
-
-            } else if (objResult instanceof Map) {
-                Map<String, Object> resultMap = (Map) objResult;
-                for (final Map.Entry<String, Object> entry : resultMap.entrySet()) {
-                    resultMap.put(entry.getKey(), resultToMap(entry.getValue(), false));
-                }
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("id", documentReference.getId());
+                resultMap.put("path", documentReference.getPath());
                 return resultMap;
 
-            } else if (objResult instanceof List) {
-                List<Object> original = (List) objResult;
-                List<Object> converted = new ArrayList<>();
-                for (final Object item : original) {
-                    converted.add(resultToMap(item, false));
-                }
-                return converted;
-
-            } else if (isRoot) {
+            } else {
                 throw new AppsmithPluginException(
                         AppsmithPluginError.PLUGIN_ERROR,
                         "Unable to serialize object of type " + objResult.getClass().getName() + "."
                 );
 
             }
-
-            return objResult;
         }
 
         @Override
@@ -424,8 +403,7 @@ public class FirestorePlugin extends BasePlugin {
 
             final Set<String> errors = validateDatasource(datasourceConfiguration);
             if (!CollectionUtils.isEmpty(errors)) {
-                return Mono.error(new AppsmithPluginException(AppsmithPluginError.PLUGIN_DATASOURCE_ARGUMENT_ERROR,
-                        errors.iterator().next()));
+                return Mono.error(new AppsmithPluginException(AppsmithPluginError.PLUGIN_ERROR, errors.iterator().next()));
             }
 
             final String projectId = authentication.getUsername();

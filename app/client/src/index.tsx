@@ -10,12 +10,12 @@ import store from "./store";
 import { LayersContext, Layers } from "constants/Layers";
 import AppRouter from "./AppRouter";
 import * as Sentry from "@sentry/react";
-import { getCurrentThemeDetails, ThemeMode } from "selectors/themeSelectors";
+import { getThemeDetails } from "selectors/themeSelectors";
 import { connect } from "react-redux";
 import { AppState } from "reducers";
 import { setThemeMode } from "actions/themeActions";
+import { ThemeMode } from "reducers/uiReducers/themeReducer";
 import { StyledToastContainer } from "components/ads/Toast";
-import localStorage from "utils/localStorage";
 
 // enable autofreeze only in development
 import { setAutoFreeze } from "immer";
@@ -65,7 +65,7 @@ class ThemedApp extends React.Component<{
   }
 }
 const mapStateToProps = (state: AppState) => ({
-  currentTheme: getCurrentThemeDetails(state),
+  currentTheme: getThemeDetails(state).theme,
 });
 const mapDispatchToProps = (dispatch: any) => ({
   setTheme: (mode: ThemeMode) => {

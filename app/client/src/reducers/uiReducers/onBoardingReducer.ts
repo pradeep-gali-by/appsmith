@@ -1,7 +1,4 @@
-import {
-  OnboardingHelperConfig,
-  OnboardingStep,
-} from "constants/OnboardingConstants";
+import { OnboardingStep } from "constants/OnboardingConstants";
 import {
   ReduxAction,
   ReduxActionTypes,
@@ -11,45 +8,32 @@ import { createReducer } from "utils/AppsmithUtils";
 
 const initialState: OnboardingState = {
   currentStep: OnboardingStep.NONE,
-  currentSubstep: 0,
-  showOnboardingLoader: false,
-  showWelcomeHelper: false,
+  showWelcomeScreen: false,
   creatingDatabase: false,
   showCompletionDialog: false,
   inOnboarding: false,
   createdDBQuery: false,
   addedWidget: false,
-  showHelper: false,
+  showingTooltip: OnboardingStep.NONE,
   showingIndicator: OnboardingStep.NONE,
-  helperStepConfig: {
-    title: "",
-    action: {
-      label: "",
-    },
-  },
 };
 
 export interface OnboardingState {
   currentStep: OnboardingStep;
-  currentSubstep: number;
-  showOnboardingLoader: boolean;
-  showWelcomeHelper: boolean;
+  showWelcomeScreen: boolean;
   creatingDatabase: boolean;
   showCompletionDialog: boolean;
   inOnboarding: boolean;
   createdDBQuery: boolean;
   addedWidget: boolean;
-  showHelper: boolean;
-  helperStepConfig: OnboardingHelperConfig;
+  // Tooltip is shown when the step matches this value
+  showingTooltip: OnboardingStep;
   showingIndicator: OnboardingStep;
 }
 
 const onboardingReducer = createReducer(initialState, {
-  [ReduxActionTypes.SHOW_ONBOARDING_LOADER]: (
-    state: OnboardingState,
-    action: ReduxAction<boolean>,
-  ) => {
-    return { ...state, showOnboardingLoader: action.payload };
+  [ReduxActionTypes.SHOW_WELCOME]: (state: OnboardingState) => {
+    return { ...state, showWelcomeScreen: true };
   },
   [ReduxActionTypes.CREATE_ONBOARDING_DBQUERY_INIT]: (
     state: OnboardingState,
@@ -62,6 +46,7 @@ const onboardingReducer = createReducer(initialState, {
     return {
       ...state,
       creatingDatabase: false,
+      showWelcomeScreen: false,
       createdDBQuery: true,
     };
   },
@@ -77,7 +62,7 @@ const onboardingReducer = createReducer(initialState, {
     state: OnboardingState,
     action: ReduxAction<number>,
   ) => {
-    return { ...state, currentStep: action.payload, currentSubstep: 0 };
+    return { ...state, currentStep: action.payload };
   },
   [ReduxActionTypes.SET_ONBOARDING_STATE]: (
     state: OnboardingState,
@@ -92,6 +77,15 @@ const onboardingReducer = createReducer(initialState, {
     return {
       ...state,
       addedWidget: true,
+    };
+  },
+  [ReduxActionTypes.SHOW_ONBOARDING_TOOLTIP]: (
+    state: OnboardingState,
+    action: ReduxAction<OnboardingStep>,
+  ) => {
+    return {
+      ...state,
+      showingTooltip: action.payload,
     };
   },
   [ReduxActionTypes.SHOW_ONBOARDING_INDICATOR]: (
@@ -110,48 +104,6 @@ const onboardingReducer = createReducer(initialState, {
     return {
       ...state,
       showCompletionDialog: action.payload,
-    };
-  },
-  [ReduxActionTypes.SHOW_ONBOARDING_HELPER]: (
-    state: OnboardingState,
-    action: ReduxAction<boolean>,
-  ) => {
-    return {
-      ...state,
-      showHelper: action.payload,
-    };
-  },
-  [ReduxActionTypes.SET_HELPER_CONFIG]: (
-    state: OnboardingState,
-    action: ReduxAction<OnboardingHelperConfig>,
-  ) => {
-    return {
-      ...state,
-      helperStepConfig: action.payload,
-    };
-  },
-  [ReduxActionTypes.SET_ONBOARDING_SUBSTEP]: (
-    state: OnboardingState,
-    action: ReduxAction<number>,
-  ) => {
-    return {
-      ...state,
-      currentSubstep: action.payload,
-    };
-  },
-  [ReduxActionTypes.SHOW_ONBOARDING_WELCOME_HELPER]: (
-    state: OnboardingState,
-    action: ReduxAction<boolean>,
-  ) => {
-    return {
-      ...state,
-      showWelcomeHelper: action.payload,
-    };
-  },
-  [ReduxActionTypes.CREATE_APPLICATION_SUCCESS]: (state: OnboardingState) => {
-    return {
-      ...state,
-      ...initialState,
     };
   },
 });

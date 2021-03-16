@@ -35,8 +35,9 @@ export const DropdownContent = styled.div<{ skin: Skin }>`
   &&& * {
     font-size: ${(props) => props.theme.fontSizes[3]}px;
   }
-  border: 0px;
-  border-color: ${(props) => props.theme.dropdown[props.skin].border};
+  border: ${(props) => (props.skin === Skin.DARK ? "1px solid" : "")};
+  border-color: ${(props) =>
+    props.skin === Skin.DARK ? props.theme.dropdown[props.skin].border : ""};
   background: ${(props) => props.theme.dropdown[props.skin].inActiveBG};
 `;
 
@@ -45,16 +46,12 @@ export const DropdownContentSection = styled.div<{
   skin: Skin;
 }>`
   position: ${(props) => (props.stick ? "sticky" : "relative")};
-  background: ${(props) => props.theme.dropdown[props.skin].inActiveBG};
+  background: white;
   z-index: ${(props) => (props.stick ? 1 : 0)};
   padding: 8px 0;
-  &&&&& .bp3-icon {
-    color: ${(props) => props.theme.dropdown[props.skin].inActiveText};
-  }
-  &&&&& button {
+  &&&&&& button {
     padding: 0;
     min-height: 0px;
-    width: 100%;
   }
   &:first-of-type {
     padding: 0 0 0px 0;
@@ -100,17 +97,16 @@ export const Option = styled.div<{
   color: ${(props) => props.theme.dropdown[props.skin].inActiveText};
   &:hover {
     ${(props) => (!props.disabled ? highlightOption : ``)};
-
-    &&& button {
-      span {
-        color: ${(props) => props.theme.dropdown[props.skin].hoverText};
-      }
-    }
   }
   ${(props) => (props.active && !props.disabled ? highlightOption : ``)};
   &&& button {
     span {
-      color: ${(props) => props.theme.dropdown[props.skin].inActiveText};
+      color: ${(props) =>
+        props.skin === Skin.DARK
+          ? props.theme.colors.textOnDarkBG
+          : props.skin === Skin.LIGHT
+          ? props.theme.colors.defaultText
+          : "initial"};
     }
   }
 `;

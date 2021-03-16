@@ -13,7 +13,6 @@ import produce from "immer";
 import { AppIconCollection, AppIconName } from "components/ads/AppIcon";
 import { ERROR_CODES } from "constants/ApiConstants";
 import { ERROR_500 } from "../constants/messages";
-import localStorage from "utils/localStorage";
 
 export const createReducer = (
   initialState: any,
@@ -93,13 +92,8 @@ export const mapToPropList = (map: Record<string, string>): Property[] => {
   });
 };
 
-export const getNextEntityName = (
-  prefix: string,
-  existingNames: string[],
-  startWithoutIndex?: boolean,
-) => {
+export const getNextEntityName = (prefix: string, existingNames: string[]) => {
   const regex = new RegExp(`^${prefix}(\\d+)$`);
-
   const usedIndices: number[] = existingNames.map((name) => {
     if (name && regex.test(name)) {
       const matches = name.match(regex);
@@ -111,15 +105,6 @@ export const getNextEntityName = (
   }) as number[];
 
   const lastIndex = Math.max(...usedIndices, ...[0]);
-
-  if (startWithoutIndex && lastIndex === 0) {
-    const exactMatchFound = existingNames.some(
-      (name) => prefix && name.trim() === prefix.trim(),
-    );
-    if (!exactMatchFound) {
-      return prefix.trim();
-    }
-  }
 
   return prefix + (lastIndex + 1);
 };
@@ -177,10 +162,8 @@ export const convertToString = (value: any): string => {
 
 const getEnvLogLevel = (configLevel: LogLevelDesc): LogLevelDesc => {
   let logLevel = configLevel;
-  if (localStorage && localStorage.getItem) {
-    const localStorageLevel = localStorage.getItem("logLevel") as LogLevelDesc;
-    if (localStorageLevel) logLevel = localStorageLevel;
-  }
+  const localStorageLevel = localStorage.getItem("logLevel") as LogLevelDesc;
+  if (localStorageLevel) logLevel = localStorageLevel;
   return logLevel;
 };
 

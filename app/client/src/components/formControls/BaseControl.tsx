@@ -13,9 +13,7 @@ export type ComparisonOperations =
   | "EQUALS"
   | "NOT_EQUALS"
   | "LESSER"
-  | "GREATER"
-  | "IN"
-  | "NOT_IN";
+  | "GREATER";
 
 export type HiddenType =
   | boolean

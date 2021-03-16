@@ -8,7 +8,6 @@ import base64 from "constants/defs/base64-js.json";
 import moment from "constants/defs/moment.json";
 import xmlJs from "constants/defs/xmlParser.json";
 import { dataTreeTypeDefCreator } from "utils/autocomplete/dataTreeTypeDefCreator";
-import { customTreeTypeDefCreator } from "utils/autocomplete/customTreeTypeDefCreator";
 import CodeMirror, { Hint, Pos, cmpPos } from "codemirror";
 import {
   getDynamicStringSegments,
@@ -58,20 +57,11 @@ class TernServer {
   docs: TernDocs = Object.create(null);
   cachedArgHints: ArgHints | null = null;
 
-  constructor(
-    dataTree: DataTree,
-    additionalDataTree?: Record<string, Record<string, unknown>>,
-  ) {
+  constructor(dataTree: DataTree) {
     const dataTreeDef = dataTreeTypeDefCreator(dataTree);
-    let customDataTreeDef = undefined;
-    if (additionalDataTree) {
-      customDataTreeDef = customTreeTypeDefCreator(additionalDataTree);
-    }
     this.server = new tern.Server({
       async: true,
-      defs: customDataTreeDef
-        ? [...DEFS, dataTreeDef, customDataTreeDef]
-        : [...DEFS, dataTreeDef],
+      defs: [...DEFS, dataTreeDef],
     });
   }
 

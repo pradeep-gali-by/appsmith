@@ -25,9 +25,6 @@ import {
   createNewApiAction,
   createNewQueryAction,
 } from "actions/apiPaneActions";
-import { NavigationTargetType } from "../../../sagas/ActionExecutionSagas";
-import { checkCurrentStep } from "sagas/OnboardingSagas";
-import { OnboardingStep } from "constants/OnboardingConstants";
 
 /* eslint-disable @typescript-eslint/ban-types */
 /* TODO: Function and object types need to be updated to enable the lint rule */
@@ -48,19 +45,6 @@ const FILE_TYPE_OPTIONS = [
   { label: "JPEG", value: "'image/jpeg'", id: "image/jpeg" },
   { label: "PNG", value: "'image/png'", id: "image/png" },
   { label: "SVG", value: "'image/svg+xml'", id: "image/svg+xml" },
-];
-
-const NAVIGATION_TARGET_FIELD_OPTIONS = [
-  {
-    label: "Same window",
-    value: `'${NavigationTargetType.SAME_WINDOW}'`,
-    id: NavigationTargetType.SAME_WINDOW,
-  },
-  {
-    label: "New window",
-    value: `'${NavigationTargetType.NEW_WINDOW}'`,
-    id: NavigationTargetType.NEW_WINDOW,
-  },
 ];
 
 const FUNC_ARGS_REGEX = /((["][^"]*["])|([\[].*[\]])|([\{].*[\}])|(['][^']*['])|([\(].*[\)[=][>][{].*[}])|([^'",][^,"+]*[^'",]*))*/gi;
@@ -99,7 +83,7 @@ export const modalGetter = (value: string) => {
   return name;
 };
 
-export const stringToJS = (string: string): string => {
+const stringToJS = (string: string): string => {
   const { stringSegments, jsSnippets } = getDynamicBindings(string);
   const js = stringSegments
     .map((segment, index) => {
@@ -113,7 +97,7 @@ export const stringToJS = (string: string): string => {
   return js;
 };
 
-export const JSToString = (js: string): string => {
+const JSToString = (js: string): string => {
   const segments = js.split(" + ");
   return segments
     .map((segment) => {
@@ -210,7 +194,6 @@ type ActionCreatorProps = {
   isValid: boolean;
   validationMessage?: string;
   onValueChange: (newValue: string) => void;
-  additionalAutoComplete?: Record<string, Record<string, unknown>>;
 };
 
 const ActionType = {
@@ -255,7 +238,6 @@ type KeyValueViewProps = ViewProps;
 type TextViewProps = ViewProps & {
   isValid: boolean;
   validationMessage?: string;
-  additionalAutoComplete?: Record<string, Record<string, unknown>>;
 };
 
 const views = {
@@ -309,7 +291,6 @@ const views = {
             evaluatedValue={props.get(props.value, false) as string}
             isValid={props.isValid}
             errorMessage={props.validationMessage}
-            additionalAutocomplete={props.additionalAutoComplete}
           />
         </ControlWrapper>
       </FieldWrapper>
@@ -335,7 +316,6 @@ const FieldType = {
   DOWNLOAD_FILE_NAME_FIELD: "DOWNLOAD_FILE_NAME_FIELD",
   DOWNLOAD_FILE_TYPE_FIELD: "DOWNLOAD_FILE_TYPE_FIELD",
   COPY_TEXT_FIELD: "COPY_TEXT_FIELD",
-  NAVIGATION_TARGET_FIELD: "NAVIGATION_TARGET_FIELD",
 };
 type FieldType = typeof FieldType[keyof typeof FieldType];
 
@@ -425,15 +405,6 @@ const fieldConfigs: FieldConfigs = {
       return textSetter(value, currentValue, 0);
     },
     view: ViewTypes.TEXT_VIEW,
-  },
-  [FieldType.NAVIGATION_TARGET_FIELD]: {
-    getter: (value: any) => {
-      return enumTypeGetter(value, 2, NavigationTargetType.SAME_WINDOW);
-    },
-    setter: (option: any, currentValue: string) => {
-      return enumTypeSetter(option.value, currentValue, 2);
-    },
-    view: ViewTypes.SELECTOR_VIEW,
   },
   [FieldType.ALERT_TEXT_FIELD]: {
     getter: (value: string) => {
@@ -530,6 +501,7 @@ const baseOptions: any = [
     label: "Execute a DB Query",
     value: ActionType.query,
   },
+
   {
     label: "Navigate To",
     value: ActionType.navigateTo,
@@ -656,9 +628,6 @@ function getFieldFromValue(
     fields.push({
       field: FieldType.QUERY_PARAMS_FIELD,
     });
-    fields.push({
-      field: FieldType.NAVIGATION_TARGET_FIELD,
-    });
   }
 
   if (value.indexOf("showModal") !== -1) {
@@ -733,7 +702,6 @@ function renderField(props: {
   pageDropdownOptions: TreeDropdownOption[];
   depth: number;
   maxDepth: number;
-  additionalAutoComplete?: Record<string, Record<string, unknown>>;
 }) {
   const { field } = props;
   const fieldType = field.field;
@@ -750,7 +718,6 @@ function renderField(props: {
     case FieldType.PAGE_SELECTOR_FIELD:
     case FieldType.ALERT_TYPE_SELECTOR_FIELD:
     case FieldType.DOWNLOAD_FILE_TYPE_FIELD:
-    case FieldType.NAVIGATION_TARGET_FIELD:
       let label = "";
       let defaultText = "Select Action";
       let options = props.apiOptionTree;
@@ -808,11 +775,6 @@ function renderField(props: {
         label = "Type";
         options = FILE_TYPE_OPTIONS;
         defaultText = "Select file type (optional)";
-      }
-      if (fieldType === FieldType.NAVIGATION_TARGET_FIELD) {
-        label = "Target";
-        options = NAVIGATION_TARGET_FIELD_OPTIONS;
-        defaultText = "Navigation target";
       }
       viewElement = (view as (props: SelectorViewProps) => JSX.Element)({
         options: options,
@@ -882,7 +844,6 @@ function renderField(props: {
         value: props.value,
         isValid: props.isValid,
         validationMessage: props.validationMessage,
-        additionalAutoComplete: props.additionalAutoComplete,
       });
       break;
     default:
@@ -905,7 +866,6 @@ function Fields(props: {
   pageDropdownOptions: TreeDropdownOption[];
   depth: number;
   maxDepth: number;
-  additionalAutoComplete?: Record<string, Record<string, unknown>>;
 }) {
   const { fields, ...otherProps } = props;
   if (fields[0].field === FieldType.ACTION_SELECTOR_FIELD) {
@@ -943,13 +903,12 @@ function Fields(props: {
                       );
                       props.onValueChange(parentValue);
                     }}
-                    additionalAutoComplete={props.additionalAutoComplete}
                   />
                 </li>
               );
             } else {
               return (
-                <li key={field.field}>
+                <li>
                   {renderField({
                     field: field,
                     ...otherProps,
@@ -1037,19 +996,7 @@ function useApiOptionTree() {
   const actions = useSelector(getActionsForCurrentPage).filter(
     (action) => action.config.pluginType === "API",
   );
-  let filteredBaseOptions = baseOptions;
-
-  // For onboarding
-  const filterOptions = useSelector((state: AppState) =>
-    checkCurrentStep(state, OnboardingStep.ADD_INPUT_WIDGET),
-  );
-  if (filterOptions) {
-    filteredBaseOptions = baseOptions.filter(
-      (item: any) => item.value === ActionType.query,
-    );
-  }
-
-  const apiOptionTree = getOptionsWithChildren(filteredBaseOptions, actions, {
+  const apiOptionTree = getOptionsWithChildren(baseOptions, actions, {
     label: "Create API",
     value: "api",
     id: "create",
@@ -1134,7 +1081,6 @@ export function ActionCreator(props: ActionCreatorProps) {
         onValueChange={props.onValueChange}
         depth={1}
         maxDepth={1}
-        additionalAutoComplete={props.additionalAutoComplete}
       />
     </TreeStructure>
   );

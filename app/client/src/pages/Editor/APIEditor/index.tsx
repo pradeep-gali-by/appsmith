@@ -22,20 +22,17 @@ import {
   getIsEditorInitialized,
 } from "selectors/editorSelectors";
 import { Plugin } from "api/PluginApi";
-import { Action, PaginationType, RapidApiAction } from "entities/Action";
+import { RapidApiAction, Action, PaginationType } from "entities/Action";
 import { getApiName } from "selectors/formSelectors";
 import Spinner from "components/editorComponents/Spinner";
-import styled, { ThemeProvider } from "styled-components";
+import styled from "styled-components";
 import CenteredWrapper from "components/designSystems/appsmith/CenteredWrapper";
 import { changeApi } from "actions/apiPaneActions";
 import PerformanceTracker, {
   PerformanceTransactionName,
 } from "utils/PerformanceTracker";
 import * as Sentry from "@sentry/react";
-import EntityNotFoundPane from "pages/Editor/EntityNotFoundPane";
 import { ApplicationPayload } from "constants/ReduxActionConstants";
-import { getThemeDetails, ThemeMode } from "selectors/themeSelectors";
-import { Theme } from "constants/DefaultTheme";
 
 const LoadingContainer = styled(CenteredWrapper)`
   height: 50%;
@@ -55,7 +52,6 @@ interface ReduxStateProps {
   apiAction: Action | ActionData | RapidApiAction | undefined;
   paginationType: PaginationType;
   isEditorInitialized: boolean;
-  lightTheme: Theme;
 }
 interface ReduxActionProps {
   submitForm: (name: string) => void;
@@ -94,7 +90,7 @@ class ApiEditor extends React.Component<Props> {
   };
 
   componentDidUpdate(prevProps: Props) {
-    if (prevProps.isRunning && !this.props.isRunning) {
+    if (prevProps.isRunning === true && this.props.isRunning === false) {
       PerformanceTracker.stopTracking(PerformanceTransactionName.RUN_API_CLICK);
     }
     if (prevProps.match.params.apiId !== this.props.match.params.apiId) {
@@ -148,9 +144,6 @@ class ApiEditor extends React.Component<Props> {
       paginationType,
       isEditorInitialized,
     } = this.props;
-    if (!this.props.pluginId && this.props.match.params.apiId) {
-      return <EntityNotFoundPane />;
-    }
     if (isCreating || !isEditorInitialized) {
       return (
         <LoadingContainer>
@@ -178,55 +171,53 @@ class ApiEditor extends React.Component<Props> {
       />
     );
     return (
-      <ThemeProvider theme={this.props.lightTheme}>
-        <div
-          style={{
-            position: "relative",
-            height: "100%",
-          }}
-        >
-          {apiId ? (
-            <>
-              {formUiComponent === "ApiEditorForm" && (
-                <ApiEditorForm
-                  pluginId={pluginId}
-                  paginationType={paginationType}
-                  isRunning={isRunning}
-                  isDeleting={isDeleting}
-                  onDeleteClick={this.handleDeleteClick}
-                  onRunClick={this.handleRunClick}
-                  appName={
-                    this.props.currentApplication
-                      ? this.props.currentApplication.name
-                      : ""
-                  }
-                  apiName={this.props.apiName}
-                />
-              )}
+      <div
+        style={{
+          position: "relative",
+          height: "100%",
+        }}
+      >
+        {apiId ? (
+          <>
+            {formUiComponent === "ApiEditorForm" && (
+              <ApiEditorForm
+                pluginId={pluginId}
+                paginationType={paginationType}
+                isRunning={isRunning}
+                isDeleting={isDeleting}
+                onDeleteClick={this.handleDeleteClick}
+                onRunClick={this.handleRunClick}
+                appName={
+                  this.props.currentApplication
+                    ? this.props.currentApplication.name
+                    : ""
+                }
+                apiName={this.props.apiName}
+              />
+            )}
 
-              {formUiComponent === "RapidApiEditorForm" && (
-                <RapidApiEditorForm
-                  apiName={this.props.apiName}
-                  apiId={this.props.match.params.apiId}
-                  paginationType={paginationType}
-                  isRunning={isRunning}
-                  isDeleting={isDeleting}
-                  onDeleteClick={this.handleDeleteClick}
-                  onRunClick={this.handleRunClick}
-                  appName={
-                    this.props.currentApplication
-                      ? this.props.currentApplication.name
-                      : ""
-                  }
-                  location={this.props.location}
-                />
-              )}
-            </>
-          ) : (
-            apiHomeScreen
-          )}
-        </div>
-      </ThemeProvider>
+            {formUiComponent === "RapidApiEditorForm" && (
+              <RapidApiEditorForm
+                apiName={this.props.apiName}
+                apiId={this.props.match.params.apiId}
+                paginationType={paginationType}
+                isRunning={isRunning}
+                isDeleting={isDeleting}
+                onDeleteClick={this.handleDeleteClick}
+                onRunClick={this.handleRunClick}
+                appName={
+                  this.props.currentApplication
+                    ? this.props.currentApplication.name
+                    : ""
+                }
+                location={this.props.location}
+              />
+            )}
+          </>
+        ) : (
+          apiHomeScreen
+        )}
+      </div>
     );
   }
 }
@@ -235,7 +226,7 @@ const mapStateToProps = (state: AppState, props: any): ReduxStateProps => {
   const apiAction = getActionById(state, props);
   const apiName = getApiName(state, props.match.params.apiId);
   const { isDeleting, isRunning, isCreating } = state.ui.apiPane;
-  return {
+  const apiEditorState = {
     actions: state.entities.actions,
     currentApplication: getCurrentApplication(state),
     currentPageName: getCurrentPageName(state),
@@ -249,8 +240,8 @@ const mapStateToProps = (state: AppState, props: any): ReduxStateProps => {
     isDeleting: isDeleting[props.match.params.apiId],
     isCreating: isCreating,
     isEditorInitialized: getIsEditorInitialized(state),
-    lightTheme: getThemeDetails(state, ThemeMode.LIGHT),
   };
+  return apiEditorState;
 };
 
 const mapDispatchToProps = (dispatch: any): ReduxActionProps => ({

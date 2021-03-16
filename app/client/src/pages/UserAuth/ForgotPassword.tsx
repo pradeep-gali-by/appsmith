@@ -4,17 +4,17 @@ import { withRouter, RouteComponentProps } from "react-router-dom";
 import { reduxForm, InjectedFormProps, formValueSelector } from "redux-form";
 import StyledForm from "components/editorComponents/Form";
 import {
+  AuthCardContainer,
   AuthCardHeader,
+  AuthCardBody,
   FormActions,
   AuthCardNavLink,
-  FormMessagesContainer,
 } from "./StyledComponents";
-import { withTheme } from "styled-components";
-import { Theme } from "constants/DefaultTheme";
 import {
   FORGOT_PASSWORD_PAGE_EMAIL_INPUT_LABEL,
   FORGOT_PASSWORD_PAGE_EMAIL_INPUT_PLACEHOLDER,
   FORGOT_PASSWORD_PAGE_SUBMIT_BUTTON_TEXT,
+  FORGOT_PASSWORD_PAGE_SUBTITLE,
   FORGOT_PASSWORD_PAGE_TITLE,
   FORM_VALIDATION_EMPTY_EMAIL,
   FORM_VALIDATION_INVALID_EMAIL,
@@ -22,12 +22,11 @@ import {
   FORGOT_PASSWORD_PAGE_LOGIN_LINK,
 } from "constants/messages";
 import { AUTH_LOGIN_URL } from "constants/routes";
-import FormMessage from "components/ads/formFields/FormMessage";
+import FormMessage from "components/editorComponents/form/FormMessage";
 import { FORGOT_PASSWORD_FORM_NAME } from "constants/forms";
-import FormGroup from "components/ads/formFields/FormGroup";
-import Button, { Size } from "components/ads/Button";
-import FormTextField from "components/ads/formFields/TextField";
-import { Icon } from "@blueprintjs/core";
+import FormGroup from "components/editorComponents/form/FormGroup";
+import Button from "components/editorComponents/Button";
+import FormTextField from "components/editorComponents/form/FormTextField";
 import { isEmail, isEmptyString } from "utils/formhelpers";
 import {
   ForgotPasswordFormValues,
@@ -53,56 +52,46 @@ type ForgotPasswordProps = InjectedFormProps<
 > &
   RouteComponentProps<{ email: string }> & { emailValue: string };
 
-export const ForgotPassword = withTheme(
-  (props: ForgotPasswordProps & { theme: Theme }) => {
-    const {
-      error,
-      handleSubmit,
-      submitting,
-      submitFailed,
-      submitSucceeded,
-    } = props;
+export const ForgotPassword = (props: ForgotPasswordProps) => {
+  const {
+    error,
+    handleSubmit,
+    submitting,
+    submitFailed,
+    submitSucceeded,
+  } = props;
 
-    return (
-      <>
-        <AuthCardHeader>
-          <h1>{FORGOT_PASSWORD_PAGE_TITLE}</h1>
-        </AuthCardHeader>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <AuthCardNavLink to={AUTH_LOGIN_URL}>
-            <Icon
-              icon="arrow-left"
-              style={{ marginRight: props.theme.spaces[3] }}
-            />
-            {FORGOT_PASSWORD_PAGE_LOGIN_LINK}
-          </AuthCardNavLink>
-        </div>
-        <FormMessagesContainer>
-          {submitSucceeded && (
-            <FormMessage
-              intent="success"
-              message={`${FORGOT_PASSWORD_SUCCESS_TEXT} ${props.emailValue}`}
-            />
-          )}
-          {!mailEnabled && (
-            <FormMessage
-              intent="warning"
-              message={
-                "You haven’t setup any email service yet. Please configure your email service to receive a reset link"
-              }
-              actions={[
-                {
-                  url: "https://docs.appsmith.com/v/v1.2.1/setup/docker/email",
-                  text: "Configure Email service",
-                  intent: "primary",
-                },
-              ]}
-            />
-          )}
-          {submitFailed && error && (
-            <FormMessage intent="warning" message={error} />
-          )}
-        </FormMessagesContainer>
+  return (
+    <AuthCardContainer>
+      {submitSucceeded && (
+        <FormMessage
+          intent="primary"
+          message={`${FORGOT_PASSWORD_SUCCESS_TEXT} ${props.emailValue}`}
+        />
+      )}
+      {!mailEnabled && (
+        <FormMessage
+          intent="warning"
+          message={
+            "You haven’t setup any email service yet. Please configure your email service to receive a reset link"
+          }
+          actions={[
+            {
+              url: "https://docs.appsmith.com/third-party-services/email",
+              text: "Configure Email service",
+              intent: "primary",
+            },
+          ]}
+        />
+      )}
+      {submitFailed && error && (
+        <FormMessage intent="warning" message={error} />
+      )}
+      <AuthCardHeader>
+        <h1>{FORGOT_PASSWORD_PAGE_TITLE}</h1>
+        <h5>{FORGOT_PASSWORD_PAGE_SUBTITLE}</h5>
+      </AuthCardHeader>
+      <AuthCardBody>
         <StyledForm onSubmit={handleSubmit(forgotPasswordSubmitHandler)}>
           <FormGroup
             intent={error ? "danger" : "none"}
@@ -116,20 +105,23 @@ export const ForgotPassword = withTheme(
           </FormGroup>
           <FormActions>
             <Button
-              tag="button"
               type="submit"
               text={FORGOT_PASSWORD_PAGE_SUBMIT_BUTTON_TEXT}
-              fill
-              size={Size.large}
+              intent="primary"
+              filled
+              size="large"
               disabled={!isEmail(props.emailValue)}
-              isLoading={submitting}
+              loading={submitting}
             />
           </FormActions>
         </StyledForm>
-      </>
-    );
-  },
-);
+      </AuthCardBody>
+      <AuthCardNavLink to={AUTH_LOGIN_URL}>
+        {FORGOT_PASSWORD_PAGE_LOGIN_LINK}
+      </AuthCardNavLink>
+    </AuthCardContainer>
+  );
+};
 
 const selector = formValueSelector(FORGOT_PASSWORD_FORM_NAME);
 

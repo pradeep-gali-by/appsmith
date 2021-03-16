@@ -21,7 +21,6 @@ const BASE_ACTION: ApiAction = {
   pluginType: PluginType.API,
   actionConfiguration: {
     httpMethod: "GET",
-    encodeParamsToggle: true,
     path: "users",
     headers: [],
     timeoutInMillisecond: 5000,

@@ -34,7 +34,6 @@ import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +43,7 @@ import static com.appsmith.server.acl.AclPermission.MANAGE_ORGANIZATIONS;
 import static com.appsmith.server.acl.AclPermission.ORGANIZATION_INVITE_USERS;
 import static com.appsmith.server.acl.AclPermission.READ_USERS;
 import static com.appsmith.server.acl.AclPermission.USER_MANAGE_ORGANIZATIONS;
+import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Service
@@ -98,8 +98,8 @@ public class OrganizationServiceImpl extends BaseService<OrganizationRepository,
 
     @Override
     public Mono<String> getNextUniqueSlug(String initialSlug) {
-        return repository.nextSlugNumber(initialSlug)
-                .map(number -> initialSlug + (number == 0 ? "" : number));
+        return repository.countSlugsByPrefix(initialSlug)
+                .map(max -> initialSlug + (max == 0 ? "" : (max + 1)));
     }
 
     /**
@@ -140,7 +140,7 @@ public class OrganizationServiceImpl extends BaseService<OrganizationRepository,
                 .anyMatch(policy -> policy.getPermission().equals(USER_MANAGE_ORGANIZATIONS.getValue()));
 
         if (!isManageOrgPolicyPresent) {
-            return Mono.error(new AppsmithException(AppsmithError.ACTION_IS_NOT_AUTHORIZED, "Create organization"));
+            return Mono.error(new AppsmithException(AppsmithError.UNAUTHORIZED_ACCESS));
         }
 
         if (organization.getEmail() == null) {
@@ -268,10 +268,9 @@ public class OrganizationServiceImpl extends BaseService<OrganizationRepository,
 
                     Set<AppsmithRole> appsmithRoles = roleGraph.generateHierarchicalRoles(roleName);
 
-                    final Map<String, String> appsmithRolesMap = new LinkedHashMap<>();
-                    for (final AppsmithRole role : appsmithRoles) {
-                        appsmithRolesMap.put(role.getName(), role.getDescription());
-                    }
+                    Map<String, String> appsmithRolesMap = appsmithRoles
+                            .stream()
+                            .collect(toMap(AppsmithRole::getName, AppsmithRole::getDescription));
 
                     return Mono.just(appsmithRolesMap);
                 });

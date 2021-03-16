@@ -27,7 +27,8 @@ import ErrorPage from "pages/common/ErrorPage";
 import PageNotFound from "pages/common/PageNotFound";
 import PageLoadingBar from "pages/common/PageLoadingBar";
 import ErrorPageHeader from "pages/common/ErrorPageHeader";
-import { getCurrentThemeDetails, ThemeMode } from "selectors/themeSelectors";
+import { getThemeDetails } from "selectors/themeSelectors";
+import { ThemeMode } from "reducers/uiReducers/themeReducer";
 import { AppState } from "reducers";
 import { setThemeMode } from "actions/themeActions";
 import { connect } from "react-redux";
@@ -114,7 +115,7 @@ class AppRouter extends React.Component<any, any> {
   }
 }
 const mapStateToProps = (state: AppState) => ({
-  currentTheme: getCurrentThemeDetails(state),
+  currentTheme: getThemeDetails(state).theme,
   safeCrash: getSafeCrash(state),
   safeCrashCode: getSafeCrashCode(state),
 });

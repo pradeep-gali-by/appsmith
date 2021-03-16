@@ -49,12 +49,6 @@ export interface SavePageResponse extends ApiResponse {
     id: string;
     layoutOnLoadActions: PageAction[][];
     dsl: Partial<ContainerWidgetProps<any>>;
-    messages: string[];
-    actionUpdates: Array<{
-      executeOnLoad: boolean;
-      id: string;
-      name: string;
-    }>;
   };
 }
 

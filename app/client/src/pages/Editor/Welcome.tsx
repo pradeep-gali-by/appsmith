@@ -1,63 +1,59 @@
 import React from "react";
 import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
 import Spinner from "components/ads/Spinner";
 import { Classes } from "components/ads/common";
-import { useDispatch, useSelector } from "react-redux";
-import AnalyticsUtil from "utils/AnalyticsUtil";
 import { AppState } from "reducers";
-import { showOnboardingLoader } from "actions/onboardingActions";
+import { endOnboarding, setCurrentStep } from "actions/onboardingActions";
+import AnalyticsUtil from "utils/AnalyticsUtil";
 
 const Wrapper = styled.div`
-  height: calc(100vh - 48px);
-  width: 100%;
+  height: 100%;
+  padding: 85px 55px;
+  flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+`;
+
+const Container = styled.div`
+  align-self: stretch;
+  flex: 1;
+  display: flex;
   background-color: white;
-
-  .${Classes.SPINNER} {
-    width: 43px;
-    height: 43px;
-    margin-top: 24px;
-
-    circle {
-      stroke: #457ae6;
-    }
-  }
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 60px;
 `;
 
-const Image = styled.img`
-  width: 601px;
-  height: 341px;
-  margin-top: 24px;
-  object-fit: scale-down;
-
-  @media only screen and (min-height: 800px) {
-    height: 441px;
-    width: 801px;
-  }
+const Content = styled.div`
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 `;
 
-const SubTitle = styled.div`
-  font-size: 12px;
-  text-align: center;
-`;
-
-const Title = styled.div`
-  font-size: 24px;
-  font-weight: 500;
+const WelcomeText = styled.div`
+  font-size: 36px;
+  font-weight: bold;
+  color: #090707;
   text-align: center;
 `;
 
 const Description = styled.div`
-  font-size: 16px;
-  margin-top: 18px;
-  width: 490px;
-  margin-top: 24px;
+  font-size: 17px;
+  color: #716e6e;
+  margin-top: 16px;
+  text-align: center;
+`;
 
-  @media only screen and (min-height: 800px) {
-    width: 630px;
+const NotNewUserText = styled.span`
+  color: #716e6e;
+  text-align: center;
+
+  span {
+    color: #457ae6;
+    cursor: pointer;
   }
 `;
 
@@ -69,43 +65,83 @@ const StyledButton = styled.button`
   padding: 12px 24px;
   border: none;
   cursor: pointer;
-  margin-top: 24px;
+  margin-top: 34px;
+`;
+
+const LoadingContainer = styled(Container)`
+  justify-content: center;
+  padding: 0px;
+
+  .${Classes.SPINNER} {
+    width: 43px;
+    height: 43px;
+
+    circle {
+      stroke: #f3672a;
+    }
+  }
+
+  span {
+    font-size: 17px;
+    margin-top: 23px;
+  }
 `;
 
 const Welcome = () => {
-  const datasourceCreated = useSelector(
-    (state: AppState) => state.ui.onBoarding.createdDBQuery,
-  );
   const dispatch = useDispatch();
+  const creatingDatabase = useSelector(
+    (state: AppState) => state.ui.onBoarding.creatingDatabase,
+  );
+
+  if (creatingDatabase) {
+    return (
+      <Wrapper>
+        <LoadingContainer>
+          <Spinner />
+          <span>Creating an example Postgres database</span>
+        </LoadingContainer>
+      </Wrapper>
+    );
+  }
 
   return (
     <Wrapper>
-      <SubTitle>WHAT WE’LL BUILD</SubTitle>
-      <Title>🦸🏻‍♂ Super Standup App</Title>
-      <Image
-        src={
-          "https://res.cloudinary.com/drako999/image/upload/v1611859209/Appsmith/Onboarding/standup_app.gif"
-        }
-      />
-      <Description>
-        Superheroes much like engineers have to coordinate their daily plans so
-        that no villain (bug) gets away! However, all heroes hate morning
-        meetings so a daily standup app is just what we need.
-      </Description>
-      {datasourceCreated ? (
-        <StyledButton
-          className="t--start-building"
-          onClick={() => {
-            AnalyticsUtil.logEvent("ONBOARDING_START_BUILDING");
+      <Container>
+        <Content>
+          <WelcomeText>
+            <span role="img" aria-label="hello">
+              👋
+            </span>{" "}
+            Welcome
+          </WelcomeText>
+          <Description>
+            We are excited to show you how Appsmith works.
+          </Description>
 
-            dispatch(showOnboardingLoader(false));
-          }}
-        >
-          Start Building
-        </StyledButton>
-      ) : (
-        <Spinner />
-      )}
+          <StyledButton
+            className="t--create-database"
+            onClick={() => {
+              dispatch(setCurrentStep(1));
+            }}
+          >
+            Explore Appsmith
+          </StyledButton>
+        </Content>
+
+        <NotNewUserText>
+          Not your first time with Appsmith?{" "}
+          <span
+            onClick={() => {
+              AnalyticsUtil.logEvent("SKIP_ONBOARDING", {
+                step: "WELCOME",
+              });
+              dispatch(endOnboarding());
+            }}
+          >
+            Skip this tutorial
+          </span>
+        </NotNewUserText>
+      </Container>
     </Wrapper>
   );
 };

@@ -1,18 +1,11 @@
 import React from "react";
 import { ControlProps } from "components/formControls/BaseControl";
 import FormControl from "./FormControl";
-import { EditorTheme } from "components/editorComponents/CodeEditor/EditorConfig";
-import styled from "styled-components";
 
 interface ActionSettingsProps {
   actionSettingsConfig: any;
   formName: string;
-  theme?: EditorTheme;
 }
-
-const FormRow = styled.div`
-  margin-bottom: ${(props) => props.theme.spaces[10] + 1}px;
-`;
 
 const ActionSettings = (props: ActionSettingsProps): JSX.Element => {
   return (
@@ -32,9 +25,9 @@ const renderEachConfig = (section: any, formName: string): any => {
       try {
         const { configProperty } = formControlOrSection;
         return (
-          <FormRow key={configProperty}>
+          <div key={configProperty} style={{ marginTop: "18px" }}>
             <FormControl config={formControlOrSection} formName={formName} />
-          </FormRow>
+          </div>
         );
       } catch (e) {
         console.log(e);

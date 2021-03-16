@@ -41,15 +41,6 @@ export enum Skin {
   DARK,
 }
 
-export const hideScrollbar = css`
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  &::-webkit-scrollbar {
-    display: none;
-    -webkit-appearance: none;
-  }
-`;
-
 export const scrollbarDark = css`
   scrollbar-color: ${(props) => props.theme.colors.paneCard}
     ${(props) => props.theme.colors.paneBG};
@@ -67,13 +58,6 @@ export const scrollbarDark = css`
     background-color: ${(props) => props.theme.colors.paneCard};
     border-radius: ${(props) => props.theme.radii[1]}px;
   }
-`;
-
-export const getTypographyByKey = (props: Record<string, any>, key: string) => `
-  font-weight: ${props.theme.typography[key].fontWeight};
-  font-size: ${props.theme.typography[key].fontSize}px;
-  line-height: ${props.theme.typography[key].lineHeight}px;
-  letter-spacing: ${props.theme.typography[key].letterSpacing}px;
 `;
 
 export const BlueprintControlTransform = css`
@@ -97,40 +81,7 @@ export const BlueprintControlTransform = css`
         background: none;
         border: 2px solid ${Colors.SLATE_GRAY};
       }
-      &.${Classes.SWITCH}
-        input:checked:disabled
-        ~ .${Classes.CONTROL_INDICATOR} {
-        opacity: 0.5;
-      }
     }
-
-    .${Classes.CHECKBOX} .${Classes.CONTROL_INDICATOR} {
-      border-radius: 0;
-    }
-
-    .${Classes.SWITCH} {
-      input:checked ~ .${Classes.CONTROL_INDICATOR} {
-        &::before {
-          left: calc(105% - 1em);
-        }
-      }
-
-      & .${Classes.CONTROL_INDICATOR} {
-        background: #d0d7dd;
-        border: 2px solid #d0d7dd;
-        &::before {
-          box-shadow: -2px 2px 5px rgba(67, 86, 100, 0.1);
-        }
-      }
-      & input:not(:disabled):active:checked ~ .${Classes.CONTROL_INDICATOR} {
-        background: ${(props) => props.theme.colors.primaryOld};
-      }
-      &:hover .${Classes.CONTROL_INDICATOR} {
-        background: #d0d7dd;
-        border: 2px solid #d0d7dd;
-      }
-    }
-
     .${Classes.CONTROL_INDICATOR} {
       box-shadow: none;
       background: none;
@@ -154,8 +105,9 @@ export const BlueprintCSSTransform = css`
   &&&& {
     .${Classes.BUTTON} {
       box-shadow: none;
-      border-radius: 0;
+      border-radius: 4px;
       background: white;
+      border: 1px solid ${Colors.GEYSER};
     }
     .${Classes.INTENT_PRIMARY} {
       background: ${IntentColors.primary};
@@ -326,7 +278,6 @@ export type Theme = {
   };
   propertyPane: PropertyPaneTheme;
   headerHeight: string;
-  smallHeaderHeight: string;
   homePage: any;
   sidebarWidth: string;
   canvasPadding: string;
@@ -346,24 +297,26 @@ export type Theme = {
   };
   dropdown: {
     [Skin.LIGHT]: {
-      hoverBG: ShadeColor;
-      hoverText: ShadeColor;
-      inActiveBG: ShadeColor;
-      inActiveText: ShadeColor;
+      hoverBG: Color;
+      hoverText: Color;
+      inActiveBG: Color;
+      inActiveText: Color;
     };
     [Skin.DARK]: {
-      hoverBG: ShadeColor;
-      hoverText: ShadeColor;
-      inActiveBG: ShadeColor;
-      inActiveText: ShadeColor;
+      hoverBG: Color;
+      hoverText: Color;
+      inActiveBG: Color;
+      inActiveText: Color;
       border: Color;
-      background: Color;
     };
   };
   authCard: {
     width: number;
+    borderRadius: number;
+    background: Color;
+    padding: number;
     dividerSpacing: number;
-    formMessageWidth: number;
+    shadow: string;
   };
   shadows: string[];
   widgets: {
@@ -394,16 +347,16 @@ export type Theme = {
     };
     [Skin.LIGHT]: {
       default: {
-        color: string;
-        background: string;
+        color: Color;
+        background: Color;
       };
       active: {
-        color: string;
-        background: string;
+        color: Color;
+        background: Color;
       };
       hover: {
-        color: string;
-        background: string;
+        color: Color;
+        background: Color;
       };
       none: {
         color: string;
@@ -507,7 +460,6 @@ const darkShades = [
   "#D4D4D4",
   "#E9E9E9",
   "#FFFFFF",
-  "#157A96",
 ] as const;
 
 const lightShades = [
@@ -523,7 +475,6 @@ const lightShades = [
   "#302D2D",
   "#090707",
   "#FFFFFF",
-  "#6A86CE",
 ] as const;
 
 type ShadeColor = typeof darkShades[number] | typeof lightShades[number];
@@ -555,7 +506,7 @@ type ColorType = {
   text: {
     normal: ShadeColor;
     heading: ShadeColor;
-    highlight: ShadeColor;
+    hightlight: ShadeColor;
   };
   icon: {
     normal: ShadeColor;
@@ -606,11 +557,6 @@ type ColorType = {
       bg: ShadeColor;
       icon: ShadeColor;
     };
-    hovered: {
-      text: ShadeColor;
-      bg: ShadeColor;
-      icon: ShadeColor;
-    };
     icon: ShadeColor;
   };
   toggle: {
@@ -656,7 +602,6 @@ type ColorType = {
   radio: {
     disable: ShadeColor;
     border: ShadeColor;
-    text: ShadeColor;
   };
   searchInput: {
     placeholder: ShadeColor;
@@ -679,7 +624,6 @@ type ColorType = {
     normal: ShadeColor;
     hover: ShadeColor;
     border: ShadeColor;
-    countBg: ShadeColor;
   };
   settingHeading: ShadeColor;
   table: {
@@ -790,145 +734,10 @@ type ColorType = {
     textColor: string;
     bg: ShadeColor;
   };
-  multiSwitch: {
-    bg: ShadeColor;
-    selectedBg: ShadeColor;
-    text: ShadeColor;
-    border: string;
-  };
-  apiPane: {
-    bg: ShadeColor;
-    text: ShadeColor;
-    dividerBg: ShadeColor;
-    iconHoverBg: ShadeColor;
-    tabBg: ShadeColor;
-    requestTree: {
-      bg: string;
-      header: {
-        text: string;
-        icon: string;
-        bg: string;
-      };
-      row: {
-        hoverBg: string;
-        key: string;
-        value: string;
-      };
-    };
-    moreActions: {
-      targetBg: string;
-      targetIcon: {
-        normal: string;
-        hover: string;
-      };
-      menuShadow: string;
-      menuBg: {
-        normal: ShadeColor;
-        hover: ShadeColor;
-      };
-      menuText: {
-        normal: ShadeColor;
-        hover: ShadeColor;
-      };
-    };
-    closeIcon: ShadeColor;
-    responseBody: {
-      bg: ShadeColor;
-    };
-    codeEditor: {
-      placeholderColor: ShadeColor;
-    };
-    body: {
-      text: string;
-    };
-    settings: {
-      textColor: ShadeColor;
-    };
-    pagination: {
-      label: ShadeColor;
-      description: ShadeColor;
-      stepTitle: ShadeColor;
-      numberBg: string;
-      bindingBg: ShadeColor;
-      numberColor: ShadeColor;
-    };
-  };
-  codeMirror: {
-    background: {
-      defaultState: string;
-      hoverState: string;
-    };
-    text: string;
-    dataType: {
-      shortForm: string;
-      fullForm: string;
-    };
-  };
   floatingBtn: any;
-  auth: any;
-  formMessage: Record<string, Record<Intent, string>>;
-  header: {
-    separator: string;
-    appName: ShadeColor;
-    background: string;
-    deployToolTipBackground: string;
-    deployToolTipText: ShadeColor;
-    shareBtnHighlight: string;
-    shareBtn: string;
-    tabsHorizontalSeparator: string;
-    tabText: string;
-    activeTabBorderBottom: string;
-    activeTabText: string;
-  };
-  gif: {
-    overlay: string;
-    text: string;
-    iconPath: string;
-    iconCircle: string;
-  };
-};
-
-const auth: any = {
-  background: darkShades[1],
-  cardBackground: lightShades[10],
-  btnPrimary: "#F86A2B",
-  inputBackground: darkShades[1],
-  headingText: "#FFF",
-  link: "#106ba3",
-  text: darkShades[7],
-  placeholder: darkShades[5],
-  socialBtnText: darkShades[8],
-  socialBtnBorder: darkShades[8],
-  socialBtnHighlight: darkShades[1],
-};
-
-const formMessage = {
-  background: {
-    danger: "rgba(226,44,44,0.08)",
-    success: "#172320",
-    warning: "rgba(224, 179, 14, 0.08)",
-  },
-  text: {
-    danger: "#E22C2C",
-    success: "#03B365",
-    warning: "#E0B30E",
-  },
 };
 
 export const dark: ColorType = {
-  header: {
-    separator: darkShades[4],
-    appName: darkShades[7],
-    background: darkShades[2],
-    deployToolTipBackground: lightShades[10],
-    deployToolTipText: darkShades[7],
-    shareBtnHighlight: "#F86A2B",
-    shareBtn: "#fff",
-    tabsHorizontalSeparator: "#EFEFEF",
-    tabText: "#6F6D6D",
-    activeTabBorderBottom: "#FF6D2D",
-    activeTabText: "#000",
-  },
   button: {
     disabledText: darkShades[6],
   },
@@ -977,7 +786,7 @@ export const dark: ColorType = {
   text: {
     normal: darkShades[6],
     heading: darkShades[7],
-    highlight: darkShades[9],
+    hightlight: darkShades[9],
   },
   icon: {
     normal: darkShades[6],
@@ -1018,7 +827,7 @@ export const dark: ColorType = {
     header: {
       text: darkShades[7],
       disabledText: darkShades[6],
-      bg: "#090707",
+      bg: darkShades[0],
       disabledBg: darkShades[2],
     },
     menuBg: darkShades[3],
@@ -1026,11 +835,6 @@ export const dark: ColorType = {
     selected: {
       text: darkShades[9],
       bg: darkShades[4],
-      icon: darkShades[8],
-    },
-    hovered: {
-      text: darkShades[9],
-      bg: darkShades[10],
       icon: darkShades[8],
     },
     icon: darkShades[6],
@@ -1059,8 +863,8 @@ export const dark: ColorType = {
     },
     normal: {
       bg: lightShades[10],
+      text: darkShades[9],
       border: darkShades[0],
-      text: darkShades[7],
     },
     placeholder: darkShades[5],
     readOnly: {
@@ -1078,7 +882,6 @@ export const dark: ColorType = {
   radio: {
     disable: darkShades[5],
     border: darkShades[4],
-    text: lightShades[11],
   },
   searchInput: {
     placeholder: darkShades[5],
@@ -1099,9 +902,8 @@ export const dark: ColorType = {
   },
   tabs: {
     normal: darkShades[6],
-    hover: darkShades[7],
+    hover: darkShades[9],
     border: darkShades[3],
-    countBg: darkShades[4],
   },
   settingHeading: darkShades[9],
   table: {
@@ -1163,7 +965,7 @@ export const dark: ColorType = {
     hoverState: darkShades[3],
   },
   tagInput: {
-    bg: "#090707",
+    bg: darkShades[0],
     tag: {
       text: darkShades[9],
     },
@@ -1212,109 +1014,14 @@ export const dark: ColorType = {
     textColor: "#090707",
     bg: darkShades[8],
   },
-  multiSwitch: {
-    bg: darkShades[2],
-    selectedBg: lightShades[10],
-    text: darkShades[8],
-    border: darkShades[3],
-  },
-  apiPane: {
-    bg: darkShades[0],
-    tabBg: lightShades[10],
-    text: darkShades[6],
-    dividerBg: darkShades[4],
-    iconHoverBg: darkShades[1],
-    requestTree: {
-      bg: lightShades[10],
-      header: {
-        text: darkShades[7],
-        icon: darkShades[7],
-        bg: darkShades[1],
-      },
-      row: {
-        hoverBg: darkShades[1],
-        key: darkShades[6],
-        value: darkShades[7],
-      },
-    },
-    moreActions: {
-      targetBg: "#090707",
-      targetIcon: {
-        normal: "#9F9F9F",
-        hover: "#9F9F9F",
-      },
-      menuShadow: "0px 12px 28px -8px rgba(0, 0, 0, 0.75)",
-      menuBg: {
-        normal: darkShades[3],
-        hover: darkShades[4],
-      },
-      menuText: {
-        normal: darkShades[7],
-        hover: darkShades[9],
-      },
-    },
-    closeIcon: darkShades[9],
-    responseBody: {
-      bg: "#090707",
-    },
-    codeEditor: {
-      placeholderColor: darkShades[5],
-    },
-    body: {
-      text: "#6D6D6D",
-    },
-    settings: {
-      textColor: "#FFFFFF",
-    },
-    pagination: {
-      label: darkShades[7],
-      description: darkShades[5],
-      stepTitle: darkShades[9],
-      numberBg: darkShades[3],
-      bindingBg: darkShades[4],
-      numberColor: lightShades[11],
-    },
-  },
-  codeMirror: {
-    background: {
-      defaultState: "#262626",
-      hoverState: darkShades[10],
-    },
-    text: "#FFFFFF",
-    dataType: {
-      shortForm: "#858282",
-      fullForm: "#6D6D6D",
-    },
-  },
   floatingBtn: {
     tagBackground: "#e22c2c",
     backgroundColor: darkShades[3],
     iconColor: darkShades[6],
   },
-  auth,
-  formMessage,
-  gif: {
-    overlay: "#000000",
-    text: "#d4d4d4",
-    iconPath: "#2b2b2b",
-    iconCircle: "#d4d4d4",
-  },
 };
 
 export const light: ColorType = {
-  header: {
-    separator: "#E0DEDE",
-    appName: lightShades[8],
-    background: lightShades[0],
-    deployToolTipText: lightShades[8],
-    deployToolTipBackground: "#FFF",
-    shareBtnHighlight: "#F86A2B",
-    shareBtn: "#4B4848",
-    tabsHorizontalSeparator: "#EFEFEF",
-    tabText: "#6F6D6D",
-    activeTabBorderBottom: "#FF6D2D",
-    activeTabText: "#000",
-  },
   button: {
     disabledText: lightShades[6],
   },
@@ -1363,7 +1070,7 @@ export const light: ColorType = {
   text: {
     normal: lightShades[8],
     heading: lightShades[9],
-    highlight: lightShades[11],
+    hightlight: lightShades[11],
   },
   icon: {
     normal: lightShades[4],
@@ -1414,11 +1121,6 @@ export const light: ColorType = {
       bg: lightShades[2],
       icon: lightShades[8],
     },
-    hovered: {
-      text: lightShades[11],
-      bg: lightShades[12],
-      icon: lightShades[8],
-    },
     icon: lightShades[7],
   },
   toggle: {
@@ -1464,7 +1166,6 @@ export const light: ColorType = {
   radio: {
     disable: lightShades[4],
     border: lightShades[3],
-    text: lightShades[10],
   },
   searchInput: {
     placeholder: lightShades[6],
@@ -1487,7 +1188,6 @@ export const light: ColorType = {
     normal: lightShades[6],
     hover: lightShades[10],
     border: lightShades[3],
-    countBg: lightShades[3],
   },
   settingHeading: lightShades[9],
   table: {
@@ -1533,7 +1233,7 @@ export const light: ColorType = {
   modal: {
     bg: lightShades[11],
     headerText: lightShades[10],
-    iconColor: lightShades[5],
+    iconColor: "#A9A7A7",
     user: {
       textColor: lightShades[9],
     },
@@ -1563,16 +1263,16 @@ export const light: ColorType = {
       bgColor: "#F8F3F0",
     },
     success: {
-      color: "#03B365",
-      bgColor: "#E4F4ED",
+      color: "#007340",
+      bgColor: "#D9FDED",
     },
     danger: {
-      color: "#F22B2B",
-      bgColor: "#F9E9E9",
+      color: "#C60707",
+      bgColor: "#FFE9E9",
     },
     warning: {
-      color: "#FEB811",
-      bgColor: "#FAF3E3",
+      color: "#DCAD00",
+      bgColor: "#FAF6E6",
     },
   },
   loader: {
@@ -1598,92 +1298,10 @@ export const light: ColorType = {
     textColor: "#F7F7F7",
     bg: lightShades[10],
   },
-  multiSwitch: {
-    bg: lightShades[3],
-    selectedBg: lightShades[11],
-    text: lightShades[8],
-    border: "#E0DEDE",
-  },
-  apiPane: {
-    bg: lightShades[0],
-    tabBg: lightShades[11],
-    text: lightShades[6],
-    dividerBg: lightShades[3],
-    iconHoverBg: lightShades[1],
-    requestTree: {
-      bg: lightShades[11],
-      header: {
-        text: lightShades[8],
-        icon: lightShades[8],
-        bg: lightShades[2],
-      },
-      row: {
-        hoverBg: lightShades[2],
-        key: lightShades[7],
-        value: lightShades[8],
-      },
-    },
-    moreActions: {
-      targetBg: "#E8E8E8",
-      targetIcon: {
-        normal: "#939090",
-        hover: "#4B4848",
-      },
-      menuShadow: "0px 12px 28px -8px rgba(0, 0, 0, 0.32)",
-      menuBg: {
-        normal: lightShades[11],
-        hover: lightShades[2],
-      },
-      menuText: {
-        normal: lightShades[6],
-        hover: lightShades[8],
-      },
-    },
-    closeIcon: lightShades[10],
-    responseBody: {
-      bg: lightShades[11],
-    },
-    codeEditor: {
-      placeholderColor: lightShades[5],
-    },
-    body: {
-      text: "#A9A7A7",
-    },
-    settings: {
-      textColor: "#090707",
-    },
-    pagination: {
-      label: lightShades[8],
-      description: lightShades[5],
-      stepTitle: lightShades[10],
-      numberBg: "#E0DEDE",
-      bindingBg: lightShades[3],
-      numberColor: lightShades[10],
-    },
-  },
-  codeMirror: {
-    background: {
-      defaultState: lightShades[0],
-      hoverState: lightShades[12],
-    },
-    text: "#090707",
-    dataType: {
-      shortForm: "#858282",
-      fullForm: "#6D6D6D",
-    },
-  },
   floatingBtn: {
     tagBackground: "#e22c2c",
     backgroundColor: lightShades[3],
     iconColor: lightShades[7],
-  },
-  auth,
-  formMessage,
-  gif: {
-    overlay: "#ffffff",
-    text: "#6f6f6f",
-    iconPath: "#c4c4c4",
-    iconCircle: "#090707",
   },
 };
 
@@ -1696,19 +1314,19 @@ export const theme: Theme = {
     h1: {
       fontSize: 20,
       lineHeight: 27,
-      letterSpacing: -0.204,
+      letterSpacing: "normal",
       fontWeight: 500,
     },
     h2: {
       fontSize: 18,
       lineHeight: 25,
-      letterSpacing: -0.204,
+      letterSpacing: "normal",
       fontWeight: 500,
     },
     h3: {
       fontSize: 17,
       lineHeight: 22,
-      letterSpacing: -0.204,
+      letterSpacing: "normal",
       fontWeight: 500,
     },
     h4: {
@@ -1777,18 +1395,6 @@ export const theme: Theme = {
       letterSpacing: -0.24,
       fontWeight: "normal",
     },
-    authCardHeader: {
-      fontStyle: "normal",
-      fontWeight: 600,
-      fontSize: 25,
-      lineHeight: 20,
-    },
-    authCardSubheader: {
-      fontStyle: "normal",
-      fontWeight: "normal",
-      fontSize: 15,
-      lineHeight: 20,
-    },
   },
   iconSizes: {
     XXS: 8,
@@ -1815,8 +1421,7 @@ export const theme: Theme = {
       lightBg: lightShades[0],
       darkBg: lightShades[10],
     },
-    appBackground: "#EDEDED",
-    artboard: "#F6F6F6",
+    appBackground: "#EFEFEF",
     primaryOld: Colors.GREEN,
     primaryDarker: Colors.JUNGLE_GREEN,
     primaryDarkest: Colors.JUNGLE_GREEN_DARKER,
@@ -1858,13 +1463,6 @@ export const theme: Theme = {
     lightningborder: Colors.ALABASTER,
     formButtonColor: Colors.WHITE,
     appCardColors: appColors,
-    dataTypeBg: {
-      function: "#BDB2FF",
-      object: "#FFD6A5",
-      unknown: "#4bb",
-      array: "#CDFFA5",
-      number: "#FFB2B2",
-    },
   },
   lineHeights: [0, 14, 16, 18, 22, 24, 28, 36, 48, 64, 80],
   fonts: {
@@ -1898,7 +1496,7 @@ export const theme: Theme = {
       color: Colors.MYSTIC,
     },
   ],
-  sidebarWidth: "250px",
+  sidebarWidth: "320px",
   homePage: {
     header: 52,
     leftPane: {
@@ -1912,7 +1510,6 @@ export const theme: Theme = {
     },
   },
   headerHeight: "48px",
-  smallHeaderHeight: "35px",
   canvasPadding: "20px 0 200px 0",
   sideNav: {
     maxWidth: 220,
@@ -1934,24 +1531,26 @@ export const theme: Theme = {
   },
   dropdown: {
     [Skin.LIGHT]: {
-      hoverBG: lightShades[0],
-      hoverText: lightShades[10],
-      inActiveBG: lightShades[3],
-      inActiveText: lightShades[8],
+      hoverBG: Colors.GREEN,
+      hoverText: Colors.WHITE,
+      inActiveBG: Colors.WHITE,
+      inActiveText: Colors.BLACK_PEARL,
     },
     [Skin.DARK]: {
-      hoverBG: darkShades[0],
-      hoverText: darkShades[9],
-      inActiveBG: darkShades[2],
-      inActiveText: darkShades[7],
+      hoverBG: Colors.TROUT_DARK,
+      hoverText: Colors.WHITE,
+      inActiveBG: Colors.BLUE_CHARCOAL,
+      inActiveText: Colors.WHITE,
       border: Colors.TROUT_DARK,
-      background: darkShades[4],
     },
   },
   authCard: {
-    width: 440,
+    width: 612,
+    borderRadius: 16,
+    background: Colors.WHITE,
+    padding: 40,
     dividerSpacing: 32,
-    formMessageWidth: 370,
+    shadow: "0px 4px 8px rgba(9, 30, 66, 0.25)",
   },
   shadows: [
     /* 0. tab */
@@ -1984,16 +1583,16 @@ export const theme: Theme = {
   lightningMenu: {
     [Skin.DARK]: {
       default: {
-        color: darkShades[7],
-        background: "transparent",
+        color: Colors.ALABASTER,
+        background: Colors.BLUE_CHARCOAL,
       },
       active: {
-        color: darkShades[9],
-        background: dark.info.main,
+        color: Colors.BLUE_CHARCOAL,
+        background: Colors.JAFFA_DARK,
       },
       hover: {
-        color: darkShades[9],
-        background: darkShades[7],
+        color: Colors.BLUE_CHARCOAL,
+        background: Colors.ALABASTER,
       },
       none: {
         color: "transparent",
@@ -2002,16 +1601,16 @@ export const theme: Theme = {
     },
     [Skin.LIGHT]: {
       default: {
-        color: lightShades[7],
-        background: "transparent",
+        color: Colors.BLUE_CHARCOAL,
+        background: Colors.WHITE,
       },
       active: {
-        color: lightShades[11],
-        background: dark.info.light,
+        color: Colors.BLUE_CHARCOAL,
+        background: Colors.JAFFA_DARK,
       },
       hover: {
-        color: lightShades[11],
-        background: lightShades[7],
+        color: Colors.WHITE,
+        background: Colors.BLUE_CHARCOAL,
       },
       none: {
         color: "transparent",
@@ -2022,7 +1621,7 @@ export const theme: Theme = {
 };
 
 export const scrollbarLight = css<{ backgroundColor?: Color }>`
-  scrollbar-color: ${(props) => props.theme.colors.paneText};
+  scrollbar-color: ${(props) => props.theme.colors.paneText}
 
   scrollbar-width: thin;
   &::-webkit-scrollbar {
@@ -2043,5 +1642,4 @@ export const scrollbarLight = css<{ backgroundColor?: Color }>`
 `;
 
 export { css, createGlobalStyle, keyframes, ThemeProvider };
-
 export default styled;

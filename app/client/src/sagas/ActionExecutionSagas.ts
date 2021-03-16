@@ -38,7 +38,6 @@ import AnalyticsUtil from "utils/AnalyticsUtil";
 import history from "utils/history";
 import {
   BUILDER_PAGE_URL,
-  convertToQueryParams,
   getApplicationViewerPageURL,
 } from "constants/routes";
 import {
@@ -86,78 +85,43 @@ import {
   evaluateActionBindings,
 } from "./EvaluationsSaga";
 import copy from "copy-to-clipboard";
-import { EMPTY_RESPONSE } from "../components/editorComponents/ApiResponseView";
-
-import localStorage from "utils/localStorage";
-
-export enum NavigationTargetType {
-  SAME_WINDOW = "SAME_WINDOW",
-  NEW_WINDOW = "NEW_WINDOW",
-}
-
-const isValidUrlScheme = (url: string): boolean => {
-  return (
-    // Standard http call
-    url.startsWith("http://") ||
-    // Secure http call
-    url.startsWith("https://") ||
-    // Mail url to directly open email app prefilled
-    url.startsWith("mailto:") ||
-    // Tel url to directly open phone app prefilled
-    url.startsWith("tel:")
-  );
-};
 
 function* navigateActionSaga(
-  action: {
-    pageNameOrUrl: string;
-    params: Record<string, string>;
-    target?: NavigationTargetType;
-  },
+  action: { pageNameOrUrl: string; params: Record<string, string> },
   event: ExecuteActionPayloadEvent,
 ) {
   const pageList = yield select(getPageList);
   const applicationId = yield select(getCurrentApplicationId);
-  const {
-    pageNameOrUrl,
-    params,
-    target = NavigationTargetType.SAME_WINDOW,
-  } = action;
   const page = _.find(
     pageList,
-    (page: Page) => page.pageName === pageNameOrUrl,
+    (page: Page) => page.pageName === action.pageNameOrUrl,
   );
   if (page) {
     AnalyticsUtil.logEvent("NAVIGATE", {
-      pageName: pageNameOrUrl,
-      pageParams: params,
+      pageName: action.pageNameOrUrl,
+      pageParams: action.params,
     });
-    const appMode = yield select(getAppMode);
+    // TODO need to make this check via RENDER_MODE;
     const path =
-      appMode === APP_MODE.EDIT
-        ? BUILDER_PAGE_URL(applicationId, page.pageId, params)
-        : getApplicationViewerPageURL(applicationId, page.pageId, params);
-    if (target === NavigationTargetType.SAME_WINDOW) {
-      history.push(path);
-    } else if (target === NavigationTargetType.NEW_WINDOW) {
-      window.open(path, "_blank");
-    }
+      history.location.pathname.indexOf("/edit") !== -1
+        ? BUILDER_PAGE_URL(applicationId, page.pageId, action.params)
+        : getApplicationViewerPageURL(
+            applicationId,
+            page.pageId,
+            action.params,
+          );
+    history.push(path);
     if (event.callback) event.callback({ success: true });
   } else {
     AnalyticsUtil.logEvent("NAVIGATE", {
-      navUrl: pageNameOrUrl,
+      navUrl: action.pageNameOrUrl,
     });
-    let url = pageNameOrUrl + convertToQueryParams(params);
     // Add a default protocol if it doesn't exist.
-    if (!isValidUrlScheme(url)) {
+    let url = action.pageNameOrUrl;
+    if (url.indexOf("://") === -1) {
       url = "https://" + url;
     }
-    if (target === NavigationTargetType.SAME_WINDOW) {
-      window.location.assign(url);
-    } else if (target === NavigationTargetType.NEW_WINDOW) {
-      window.open(url, "_blank");
-    }
-    if (event.callback) event.callback({ success: true });
+    window.location.assign(url);
   }
 }
 
@@ -482,10 +446,6 @@ export function* executeActionSaga(
       executeActionError({
         actionId: actionId,
         error,
-        data: {
-          ...EMPTY_RESPONSE,
-          body: "There was an error executing this action",
-        },
       }),
     );
     Toaster.show({
@@ -544,9 +504,20 @@ function* executeActionTriggers(
         yield call(copySaga, trigger.payload, event);
         break;
       default:
-        log.error("Trigger type unknown", trigger.type);
+        yield put(
+          executeActionError({
+            error: "Trigger type unknown",
+            actionId: "",
+          }),
+        );
     }
   } catch (e) {
+    yield put(
+      executeActionError({
+        error: "Failed to execute action",
+        actionId: "",
+      }),
+    );
     if (event.callback) event.callback({ success: false });
   }
 }
@@ -728,12 +699,10 @@ function* executePageLoadAction(pageAction: PageAction) {
       pageAction.timeoutInMillisecond,
     );
     if (isErrorResponse(response)) {
-      let body = _.get(response, "data.body");
+      const body = _.get(response, "data.body");
       let message = `The action "${pageAction.name}" has failed.`;
+
       if (body) {
-        if (_.isObject(body)) {
-          body = JSON.stringify(body);
-        }
         message += `\nERROR: "${body}"`;
       }
 
@@ -744,7 +713,6 @@ function* executePageLoadAction(pageAction: PageAction) {
           error: _.get(response, "responseMeta.error", {
             message,
           }),
-          data: createActionExecutionResponse(response),
         }),
       );
       PerformanceTracker.stopAsyncTracking(
@@ -777,10 +745,6 @@ function* executePageLoadAction(pageAction: PageAction) {
         isPageLoad: true,
         error: {
           message: `The action "${pageAction.name}" has failed.`,
-        },
-        data: {
-          ...EMPTY_RESPONSE,
-          body: "There was an error executing this action",
         },
       }),
     );

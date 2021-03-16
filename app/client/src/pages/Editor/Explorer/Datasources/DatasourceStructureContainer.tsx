@@ -1,5 +1,3 @@
-import Boxed from "components/editorComponents/Onboarding/Boxed";
-import { OnboardingStep } from "constants/OnboardingConstants";
 import {
   DatasourceStructure as DatasourceStructureType,
   DatasourceTable,
@@ -28,17 +26,12 @@ export const DatasourceStructureContainer = memo((props: Props) => {
       view = props.datasourceStructure.tables.map(
         (structure: DatasourceTable) => {
           return (
-            <Boxed
+            <DatasourceStructure
               key={`${props.datasourceId}${structure.name}`}
-              step={OnboardingStep.DEPLOY}
-              show={structure.name === "public.standup_updates"}
-            >
-              <DatasourceStructure
-                dbStructure={structure}
-                step={props.step + 1}
-                datasourceId={props.datasourceId}
-              />
-            </Boxed>
+              dbStructure={structure}
+              step={props.step + 1}
+              datasourceId={props.datasourceId}
+            />
           );
         },
       );

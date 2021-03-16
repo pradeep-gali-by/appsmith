@@ -1,33 +1,45 @@
 import React from "react";
-import { reduxForm, InjectedFormProps, formValueSelector } from "redux-form";
+import { reduxForm, InjectedFormProps } from "redux-form";
 import { AUTH_LOGIN_URL } from "constants/routes";
 import { SIGNUP_FORM_NAME } from "constants/forms";
-import { RouteComponentProps, useLocation, withRouter } from "react-router-dom";
+import {
+  Link,
+  RouteComponentProps,
+  useLocation,
+  withRouter,
+} from "react-router-dom";
+import Divider from "components/editorComponents/Divider";
 import {
   AuthCardHeader,
+  AuthCardBody,
+  AuthCardFooter,
   AuthCardNavLink,
   SpacedSubmitForm,
   FormActions,
-  SignUpLinkSection,
+  AuthCardContainer,
 } from "./StyledComponents";
 import {
   SIGNUP_PAGE_TITLE,
+  SIGNUP_PAGE_SUBTITLE,
   SIGNUP_PAGE_EMAIL_INPUT_LABEL,
   SIGNUP_PAGE_EMAIL_INPUT_PLACEHOLDER,
   SIGNUP_PAGE_PASSWORD_INPUT_LABEL,
   SIGNUP_PAGE_PASSWORD_INPUT_PLACEHOLDER,
   SIGNUP_PAGE_LOGIN_LINK_TEXT,
+  FORM_VALIDATION_EMPTY_EMAIL,
   FORM_VALIDATION_EMPTY_PASSWORD,
   FORM_VALIDATION_INVALID_EMAIL,
   FORM_VALIDATION_INVALID_PASSWORD,
   SIGNUP_PAGE_SUBMIT_BUTTON_TEXT,
-  ALREADY_HAVE_AN_ACCOUNT,
+  PRIVACY_POLICY_LINK,
+  TERMS_AND_CONDITIONS_LINK,
+  FORM_VALIDATION_PASSWORD_RULE,
 } from "constants/messages";
-import FormMessage from "components/ads/formFields/FormMessage";
-import FormGroup from "components/ads/formFields/FormGroup";
-import FormTextField from "components/ads/formFields/TextField";
+import FormMessage from "components/editorComponents/form/FormMessage";
+import FormGroup from "components/editorComponents/form/FormGroup";
+import FormTextField from "components/editorComponents/form/FormTextField";
 import ThirdPartyAuth, { SocialLoginTypes } from "./ThirdPartyAuth";
-import Button, { Size } from "components/ads/Button";
+import Button from "components/editorComponents/Button";
 
 import { isEmail, isStrongPassword, isEmptyString } from "utils/formhelpers";
 
@@ -41,22 +53,30 @@ import { AppState } from "reducers";
 import PerformanceTracker, {
   PerformanceTransactionName,
 } from "utils/PerformanceTracker";
-import { useIntiateOnboarding } from "components/editorComponents/Onboarding/utils";
-
-import { SIGNUP_FORM_EMAIL_FIELD_NAME } from "constants/forms";
-
+import { setOnboardingState } from "utils/storage";
 const {
   enableGithubOAuth,
   enableGoogleOAuth,
+  enableTNCPP,
   enableOIDCProviderOAuth,
 } = getAppsmithConfigs();
 const SocialLoginList: string[] = [];
-if (enableGoogleOAuth) SocialLoginList.push(SocialLoginTypes.GOOGLE);
 if (enableGithubOAuth) SocialLoginList.push(SocialLoginTypes.GITHUB);
+if (enableGoogleOAuth) SocialLoginList.push(SocialLoginTypes.GOOGLE);
 if (enableOIDCProviderOAuth) SocialLoginList.push(SocialLoginTypes.OIDC);
-
-import { withTheme } from "styled-components";
-import { Theme } from "constants/DefaultTheme";
+export const TncPPLinks = () => {
+  if (!enableTNCPP) return null;
+  return (
+    <>
+      <Link target="_blank" to="/privacy-policy.html">
+        {PRIVACY_POLICY_LINK}
+      </Link>
+      <Link target="_blank" to="/terms-and-conditions.html">
+        {TERMS_AND_CONDITIONS_LINK}
+      </Link>
+    </>
+  );
+};
 
 const validate = (values: SignupFormValues) => {
   const errors: SignupFormValues = {};
@@ -65,26 +85,20 @@ const validate = (values: SignupFormValues) => {
   } else if (!isStrongPassword(values.password)) {
     errors.password = FORM_VALIDATION_INVALID_PASSWORD;
   }
-
-  const email = values.email || "";
-  if (!isEmptyString(email) && !isEmail(email)) {
+  if (!values.email || isEmptyString(values.email)) {
+    errors.email = FORM_VALIDATION_EMPTY_EMAIL;
+  } else if (!isEmail(values.email)) {
     errors.email = FORM_VALIDATION_INVALID_EMAIL;
   }
   return errors;
 };
 
-type SignUpFormProps = InjectedFormProps<
-  SignupFormValues,
-  { emailValue: string }
-> &
-  RouteComponentProps<{ email: string }> & { theme: Theme; emailValue: string };
+type SignUpFormProps = InjectedFormProps<SignupFormValues> &
+  RouteComponentProps<{ email: string }>;
 
 export const SignUp = (props: SignUpFormProps) => {
-  const { error, submitting, pristine, valid, emailValue: email } = props;
-  const isFormValid = valid && email && !isEmptyString(email);
-
+  const { error, submitting, pristine, valid } = props;
   const location = useLocation();
-  const initiateOnboarding = useIntiateOnboarding();
 
   let showError = false;
   let errorMessage = "";
@@ -102,84 +116,85 @@ export const SignUp = (props: SignUpFormProps) => {
   }
 
   return (
-    <>
+    <AuthCardContainer>
       {showError && <FormMessage intent="danger" message={errorMessage} />}
       <AuthCardHeader>
         <h1>{SIGNUP_PAGE_TITLE}</h1>
+        <h5>{SIGNUP_PAGE_SUBTITLE}</h5>
       </AuthCardHeader>
-      <SignUpLinkSection>
-        {ALREADY_HAVE_AN_ACCOUNT}
-        <AuthCardNavLink
-          to={AUTH_LOGIN_URL}
-          style={{ marginLeft: props.theme.spaces[3] }}
-        >
-          {SIGNUP_PAGE_LOGIN_LINK_TEXT}
-        </AuthCardNavLink>
-      </SignUpLinkSection>
-      {SocialLoginList.length > 0 && (
-        <ThirdPartyAuth type={"SIGNUP"} logins={SocialLoginList} />
-      )}
-      <SpacedSubmitForm method="POST" action={signupURL}>
-        <FormGroup
-          intent={error ? "danger" : "none"}
-          label={SIGNUP_PAGE_EMAIL_INPUT_LABEL}
-        >
-          <FormTextField
-            name="email"
-            type="email"
-            placeholder={SIGNUP_PAGE_EMAIL_INPUT_PLACEHOLDER}
-            autoFocus
-          />
-        </FormGroup>
-        <FormGroup
-          intent={error ? "danger" : "none"}
-          label={SIGNUP_PAGE_PASSWORD_INPUT_LABEL}
-          // helperText={FORM_VALIDATION_PASSWORD_RULE}
-        >
-          <FormTextField
-            type="password"
-            name="password"
-            placeholder={SIGNUP_PAGE_PASSWORD_INPUT_PLACEHOLDER}
-          />
-        </FormGroup>
-        <FormActions>
-          <Button
-            tag="button"
-            type="submit"
-            disabled={pristine || !isFormValid}
-            isLoading={submitting}
-            text={SIGNUP_PAGE_SUBMIT_BUTTON_TEXT}
-            fill
-            size={Size.large}
-            onClick={() => {
-              AnalyticsUtil.logEvent("SIGNUP_CLICK", {
-                signupMethod: "EMAIL",
-              });
-              PerformanceTracker.startTracking(
-                PerformanceTransactionName.SIGN_UP,
-              );
-              initiateOnboarding();
-            }}
-          />
-        </FormActions>
-      </SpacedSubmitForm>
-    </>
+      <AuthCardBody>
+        <SpacedSubmitForm method="POST" action={signupURL}>
+          <FormGroup
+            intent={error ? "danger" : "none"}
+            label={SIGNUP_PAGE_EMAIL_INPUT_LABEL}
+          >
+            <FormTextField
+              name="email"
+              type="email"
+              placeholder={SIGNUP_PAGE_EMAIL_INPUT_PLACEHOLDER}
+              autoFocus
+            />
+          </FormGroup>
+          <FormGroup
+            intent={error ? "danger" : "none"}
+            label={SIGNUP_PAGE_PASSWORD_INPUT_LABEL}
+            helperText={FORM_VALIDATION_PASSWORD_RULE}
+          >
+            <FormTextField
+              type="password"
+              name="password"
+              placeholder={SIGNUP_PAGE_PASSWORD_INPUT_PLACEHOLDER}
+            />
+          </FormGroup>
+          <FormActions>
+            <Button
+              type="submit"
+              disabled={pristine || !valid}
+              loading={submitting}
+              text={SIGNUP_PAGE_SUBMIT_BUTTON_TEXT}
+              intent="primary"
+              filled
+              size="large"
+              onClick={() => {
+                AnalyticsUtil.logEvent("SIGNUP_CLICK", {
+                  signupMethod: "EMAIL",
+                });
+                PerformanceTracker.startTracking(
+                  PerformanceTransactionName.SIGN_UP,
+                );
+                setOnboardingState(true);
+              }}
+            />
+          </FormActions>
+        </SpacedSubmitForm>
+        {SocialLoginList.length > 0 && (
+          <>
+            <Divider />
+            <ThirdPartyAuth type={"SIGNUP"} logins={SocialLoginList} />
+          </>
+        )}
+      </AuthCardBody>
+      <AuthCardFooter>
+        <TncPPLinks />
+      </AuthCardFooter>
+      <AuthCardNavLink to={AUTH_LOGIN_URL}>
+        {SIGNUP_PAGE_LOGIN_LINK_TEXT}
+      </AuthCardNavLink>
+    </AuthCardContainer>
   );
 };
 
-const selector = formValueSelector(SIGNUP_FORM_NAME);
 export default connect((state: AppState, props: SignUpFormProps) => {
   const queryParams = new URLSearchParams(props.location.search);
   return {
     initialValues: {
       email: queryParams.get("email"),
     },
-    emailValue: selector(state, SIGNUP_FORM_EMAIL_FIELD_NAME),
   };
 }, null)(
-  reduxForm<SignupFormValues, { emailValue: string }>({
+  reduxForm<SignupFormValues>({
     validate,
     form: SIGNUP_FORM_NAME,
     touchOnBlur: true,
-  })(withRouter(withTheme(SignUp))),
+  })(withRouter(SignUp)),
 );

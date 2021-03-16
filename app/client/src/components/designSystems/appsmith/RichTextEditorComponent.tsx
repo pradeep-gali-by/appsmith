@@ -2,9 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { debounce } from "lodash";
 import styled from "styled-components";
 import { useScript, ScriptStatus } from "utils/hooks/useScript";
-
-import { isString } from "utils/helpers";
-
 const StyledRTEditor = styled.div`
   && {
     width: 100%;
@@ -27,12 +24,12 @@ export const RichtextEditorComponent = (
   props: RichtextEditorComponentProps,
 ) => {
   const status = useScript(
-    "https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.7.0/tinymce.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.4.0/tinymce.min.js",
   );
 
   const [isEditorInitialised, setIsEditorInitialised] = useState(false);
-  const [editorInstance, setEditorInstance] = useState(null as any);
 
+  const [editorInstance, setEditorInstance] = useState(null as any);
   /* Using editorContent as a variable to save editor content locally to verify against new content*/
   const editorContent = useRef("");
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -50,7 +47,9 @@ export const RichtextEditorComponent = (
       (editorContent.current.length === 0 ||
         editorContent.current !== props.defaultValue)
     ) {
-      const content = getContent();
+      const content = props.defaultValue
+        ? props.defaultValue.replace(/\n/g, "<br/>")
+        : props.defaultValue;
 
       editorInstance.setContent(content, {
         format: "html",
@@ -73,7 +72,9 @@ export const RichtextEditorComponent = (
       resize: false,
       setup: (editor: any) => {
         editor.mode.set(props.isDisabled === true ? "readonly" : "design");
-        const content = getContent();
+        const content = props.defaultValue
+          ? props.defaultValue.replace(/\n/g, "<br/>")
+          : props.defaultValue;
         editor.setContent(content, { format: "html" });
         editor
           .on("Change", () => {
@@ -107,15 +108,6 @@ export const RichtextEditorComponent = (
       editorInstance !== null && editorInstance.remove();
     };
   }, [status]);
-
-  /**
-   * get content for rich text editor
-   */
-  const getContent = () => {
-    return props.defaultValue && isString(props.defaultValue)
-      ? props.defaultValue.replace(/\n/g, "<br/>")
-      : props.defaultValue;
-  };
 
   if (status !== ScriptStatus.READY) return null;
 

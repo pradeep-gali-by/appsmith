@@ -19,5 +19,4 @@ public interface CustomDatasourceRepository extends AppsmithRepository<Datasourc
     Flux<Datasource> findAllByIds(Set<String> ids, AclPermission permission);
 
     Mono<UpdateResult> saveStructure(String datasourceId, DatasourceStructure structure);
-
 }

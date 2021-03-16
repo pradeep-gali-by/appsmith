@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import _ from "lodash";
 import { DATASOURCE_DB_FORM } from "constants/forms";
+import { Spinner } from "@blueprintjs/core";
 import { DATA_SOURCES_EDITOR_URL } from "constants/routes";
 import FormControl from "../FormControl";
 import Collapsible from "./Collapsible";
@@ -9,7 +10,7 @@ import history from "utils/history";
 import { Icon } from "@blueprintjs/core";
 import FormTitle from "./FormTitle";
 import { ControlProps } from "components/formControls/BaseControl";
-
+import CenteredWrapper from "components/designSystems/appsmith/CenteredWrapper";
 import CollapsibleHelp from "components/designSystems/appsmith/help/CollapsibleHelp";
 import Connected from "./Connected";
 
@@ -26,10 +27,6 @@ import BackButton from "./BackButton";
 import { PluginType } from "entities/Action";
 import Boxed from "components/editorComponents/Onboarding/Boxed";
 import { OnboardingStep } from "constants/OnboardingConstants";
-import { isHidden } from "components/formControls/utils";
-import log from "loglevel";
-import { Spinner } from "@blueprintjs/core";
-import CenteredWrapper from "components/designSystems/appsmith/CenteredWrapper";
 
 const { cloudHosting } = getAppsmithConfigs();
 
@@ -43,10 +40,10 @@ interface DatasourceDBEditorProps {
   isDeleting: boolean;
   datasourceId: string;
   applicationId: string;
-  loadingFormConfigs: boolean;
   pageId: string;
   formData: Datasource;
   isTesting: boolean;
+  loadingFormConfigs: boolean;
   formConfig: any[];
   isNewDatasource: boolean;
   pluginImage: string;
@@ -61,15 +58,11 @@ interface DatasourceDBEditorState {
 type Props = DatasourceDBEditorProps &
   InjectedFormProps<Datasource, DatasourceDBEditorProps>;
 
-export const LoadingContainer = styled(CenteredWrapper)`
-  height: 50%;
-`;
-
 const DBForm = styled.div`
   padding: 20px;
   margin-left: 10px;
   margin-right: 0px;
-  height: calc(100vh - ${(props) => props.theme.smallHeaderHeight});
+  height: calc(100vh - ${(props) => props.theme.headerHeight});
   overflow: auto;
   .backBtn {
     padding-bottom: 1px;
@@ -120,6 +113,10 @@ const StyledButton = styled(Button)`
     width: 87px;
     height: 32px;
   }
+`;
+
+const LoadingContainer = styled(CenteredWrapper)`
+  height: 50%;
 `;
 
 const StyledOpenDocsIcon = styled(Icon)`
@@ -215,7 +212,8 @@ class DatasourceDBEditor extends React.Component<
   };
 
   render() {
-    const { formConfig, loadingFormConfigs } = this.props;
+    const { loadingFormConfigs, formConfig } = this.props;
+    const content = this.renderDataSourceConfigForm(formConfig);
     if (loadingFormConfigs) {
       return (
         <LoadingContainer>
@@ -223,7 +221,7 @@ class DatasourceDBEditor extends React.Component<
         </LoadingContainer>
       );
     }
-    const content = this.renderDataSourceConfigForm(formConfig);
+
     return <DBForm>{content}</DBForm>;
   }
 
@@ -414,7 +412,6 @@ class DatasourceDBEditor extends React.Component<
   };
 
   renderMainSection = (section: any, index: number) => {
-    if (isHidden(this.props.formData, section.hidden)) return null;
     return (
       <Collapsible title={section.sectionName} defaultIsOpen={index === 0}>
         {this.renderEachConfig(section)}
@@ -422,73 +419,60 @@ class DatasourceDBEditor extends React.Component<
     );
   };
 
-  renderSingleConfig = (
-    config: ControlProps,
-    multipleConfig?: ControlProps[],
-  ) => {
-    multipleConfig = multipleConfig || [];
-    try {
-      this.setupConfig(config);
-      return (
-        <div key={config.configProperty} style={{ marginTop: "16px" }}>
-          <FormControl
-            config={config}
-            formName={DATASOURCE_DB_FORM}
-            multipleConfig={multipleConfig}
-          />
-        </div>
-      );
-    } catch (e) {
-      log.error(e);
-    }
-  };
+  renderEachConfig(section: any) {
+    const keyValueItems: any = [];
 
-  setupConfig = (config: ControlProps) => {
-    const { controlType, isRequired, configProperty } = config;
-    this.configDetails[configProperty] = controlType;
-
-    if (isRequired) {
-      this.requiredFields[configProperty] = config;
-    }
-  };
-
-  isKVArray = (children: Array<ControlProps>) => {
-    if (!Array.isArray(children) || children.length < 2) return false;
     return (
-      children[0].controlType && children[0].controlType === "KEYVALUE_ARRAY"
-    );
-  };
+      <div key={section.id}>
+        <div>
+          {_.map(section.children, (propertyControlOrSection: ControlProps) => {
+            if ("children" in propertyControlOrSection) {
+              return this.renderEachConfig(propertyControlOrSection);
+            } else {
+              try {
+                const {
+                  controlType,
+                  isRequired,
+                  configProperty,
+                } = propertyControlOrSection;
+                const config = { ...propertyControlOrSection };
+                const multipleConfig = keyValueItems;
 
-  renderKVArray = (children: Array<ControlProps>) => {
-    try {
-      // setup config for each child
-      children.forEach((c) => this.setupConfig(c));
-      // We pass last child for legacy reasons, to keep the logic here exactly same as before.
-      return this.renderSingleConfig(children[children.length - 1], children);
-    } catch (e) {
-      log.error(e);
-    }
-  };
+                this.configDetails[configProperty] = controlType;
 
-  renderEachConfig = (section: any) => {
-    return (
-      <div key={section.sectionName}>
-        {_.map(section.children, (propertyControlOrSection: ControlProps) => {
-          // If the section is hidden, skip rendering
-          if (isHidden(this.props.formData, section.hidden)) return null;
-          if ("children" in propertyControlOrSection) {
-            const { children } = propertyControlOrSection;
-            if (this.isKVArray(children)) {
-              return this.renderKVArray(children);
+                if (isRequired) {
+                  this.requiredFields[
+                    configProperty
+                  ] = propertyControlOrSection;
+                }
+
+                if (
+                  controlType === "KEYVALUE_ARRAY" &&
+                  keyValueItems.length < 2
+                ) {
+                  keyValueItems.push(config);
+
+                  if (keyValueItems.length < 2) return undefined;
+                }
+
+                return (
+                  <div key={configProperty} style={{ marginTop: "16px" }}>
+                    <FormControl
+                      config={config}
+                      formName={DATASOURCE_DB_FORM}
+                      multipleConfig={multipleConfig}
+                    />
+                  </div>
+                );
+              } catch (e) {
+                console.log(e);
+              }
             }
-            return this.renderEachConfig(propertyControlOrSection);
-          } else {
-            return this.renderSingleConfig(propertyControlOrSection);
-          }
-        })}
+          })}
+        </div>
       </div>
     );
-  };
+  }
 }
 
 export default reduxForm<Datasource, DatasourceDBEditorProps>({

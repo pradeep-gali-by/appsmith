@@ -1,7 +1,6 @@
-# DB Integration
-Create a appsmith-docs/datasource-reference/<integratiom>.md file.
+# DB Integration docs
+Create a appsmith-docs/db-integrations/<integratiom>.md file.
 Follow the [asset-upload](./UploadingAssets.md) guidelines to upload and use an asset in docs.
-Update the SUMMARY.md file with the link to the new document
 
 ## Action docs template
 Copy paste this template 
@@ -11,11 +10,12 @@ description: >-
   Integration Description
 ---
 
-# Connection Settings
+# Integration Name
 
-# Querying the database
+## Link to the official documentation
 
-# Using Queries in applications
+## Example of Passing Data from widgets
 
+## Example of Displaying Data in widgets
 ```
 

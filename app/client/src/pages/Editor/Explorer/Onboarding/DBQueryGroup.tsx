@@ -1,21 +1,15 @@
 import Boxed from "components/editorComponents/Onboarding/Boxed";
 import OnboardingIndicator from "components/editorComponents/Onboarding/Indicator";
-import {
-  OnboardingHelperConfig,
-  OnboardingStep,
-} from "constants/OnboardingConstants";
+import { OnboardingStep } from "constants/OnboardingConstants";
 import { PluginType } from "entities/Action";
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 import { AppState } from "reducers";
-import { getHelperConfig } from "sagas/OnboardingSagas";
 import { getPlugins } from "selectors/entitiesSelector";
 import styled from "styled-components";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import { getPluginGroups, ACTION_PLUGIN_MAP } from "../Actions/helpers";
 import { useActions, useFilteredDatasources } from "../hooks";
-import DragTableGif from "assets/gifs/table_drag.gif";
-import { setCurrentSubstep, setHelperConfig } from "actions/onboardingActions";
 
 const AddWidget = styled.button`
   margin-bottom: 25px;
@@ -47,19 +41,6 @@ const DBQueryGroup = (props: any) => {
   const dbPluginMap = ACTION_PLUGIN_MAP.filter(
     (plugin) => plugin?.type === PluginType.DB,
   );
-  const addedWidget = useSelector(
-    (state: AppState) => state.ui.onBoarding.addedWidget,
-  );
-  const dispatch = useDispatch();
-  const helperConfig = getHelperConfig(
-    OnboardingStep.RUN_QUERY_SUCCESS,
-  ) as OnboardingHelperConfig;
-
-  useEffect(() => {
-    if (addedWidget) {
-      props.showWidgetsSidebar();
-    }
-  }, [addedWidget]);
 
   return (
     <Wrapper>
@@ -67,21 +48,13 @@ const DBQueryGroup = (props: any) => {
         <AddWidgetWrapper>
           <OnboardingIndicator
             step={OnboardingStep.RUN_QUERY_SUCCESS}
-            width={160}
+            offset={{ bottom: 25 }}
+            theme={"light"}
           >
             <AddWidget
               className="t--add-widget"
               onClick={() => {
                 AnalyticsUtil.logEvent("ONBOARDING_ADD_WIDGET_CLICK");
-                dispatch(
-                  setHelperConfig({
-                    ...helperConfig,
-                    image: {
-                      src: DragTableGif,
-                    },
-                  }),
-                );
-                dispatch(setCurrentSubstep(2));
                 props.showWidgetsSidebar();
               }}
             >

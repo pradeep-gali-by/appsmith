@@ -53,6 +53,4 @@ public interface NewPageService extends CrudService<NewPage, String> {
     Mono<Boolean> archiveById(String id);
 
     Flux<NewPage> saveAll(List<NewPage> pages);
-
-    Mono<String> getNameByPageId(String pageId, boolean isPublishedName);
 }

@@ -1,14 +1,34 @@
 import React, { ReactNode, useState } from "react";
-import styled, { withTheme } from "styled-components";
-import { Icon, Popover, PopoverPosition } from "@blueprintjs/core";
-import { Theme } from "constants/DefaultTheme";
+import styled from "styled-components";
+import { Icon, Popover, PopoverPosition, Tooltip } from "@blueprintjs/core";
+import copy from "copy-to-clipboard";
+import { PopoverInteractionKind } from "@blueprintjs/core/lib/esm/components/popover/popover";
+
+const IconContainer = styled.div`
+  cursor: pointer;
+  margin: 0 10px;
+  border: 1px solid #bcccd9;
+  border-radius: 50%;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  svg {
+    transform: rotate(45deg);
+  }
+`;
 
 const DeployLinkDialog = styled.div`
   display: flex;
   align-items: center;
+  background-color: #fff;
   padding: 10px;
-  background-color: ${(props) =>
-    props.theme.colors.header.deployToolTipBackground};
+  width: 336px;
+  height: 62px;
+  color: #2e3d49;
   flex-direction: row;
 `;
 
@@ -16,15 +36,17 @@ const DeployLink = styled.a`
   display: flex;
   cursor: pointer;
   text-decoration: none;
-  color: ${(props) => props.theme.colors.header.deployToolTipText};
+  padding-right: 10px;
+  color: #2e3d49;
   :hover {
-    text-decoration: underline;
-    color: ${(props) => props.theme.colors.header.deployToolTipText};
+    text-decoration: none;
+    color: #2e3d49;
   }
 `;
 
 const DeployUrl = styled.div`
   flex: 1;
+  width: 222px;
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
@@ -35,40 +57,65 @@ const DeployUrl = styled.div`
 type Props = {
   trigger: ReactNode;
   link: string;
-  theme: Theme;
 };
 
-export const DeployLinkButton = withTheme((props: Props) => {
+export const DeployLinkButton = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const link = window.location.origin + props.link;
 
   const onClose = () => {
     setIsOpen(false);
   };
 
+  const copyToClipboard = () => {
+    copy(link);
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 3000);
+  };
+
   return (
     <React.Fragment>
       <Popover
-        modifiers={{ offset: { enabled: true, offset: "0, -3" } }}
+        modifiers={{
+          offset: {
+            enabled: true,
+            offset: "0, 5",
+          },
+        }}
         content={
           <DeployLinkDialog>
+            <Tooltip
+              content={isCopied ? "Copied!" : "Copy link to published app"}
+              autoFocus={false}
+              interactionKind={PopoverInteractionKind.HOVER_TARGET_ONLY}
+              lazy
+              position={PopoverPosition.BOTTOM}
+              openOnTargetFocus={false}
+            >
+              <IconContainer onClick={copyToClipboard}>
+                <Icon icon="link" color="#BCCCD9" />
+              </IconContainer>
+            </Tooltip>
             <DeployLink target="_blank" href={props.link}>
-              <DeployUrl>Current deployed version</DeployUrl>
-              <Icon
-                icon="share"
-                color={props.theme.colors.header.deployToolTipText}
-              />
+              <DeployUrl>
+                <span>{link}</span>
+              </DeployUrl>
+              <Icon icon="share" color={"rgba(0,0,0,0.5)"} />
             </DeployLink>
           </DeployLinkDialog>
         }
         canEscapeKeyClose={false}
         onClose={onClose}
         isOpen={isOpen}
-        position={PopoverPosition.BOTTOM_RIGHT}
+        position={PopoverPosition.BOTTOM}
       >
         <div onClick={() => setIsOpen(true)}>{props.trigger}</div>
       </Popover>
     </React.Fragment>
   );
-});
+};
 
 export default DeployLinkButton;

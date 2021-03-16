@@ -5,8 +5,7 @@ import com.appsmith.server.acl.AclPermission;
 import com.appsmith.server.domains.NewAction;
 import com.appsmith.server.dtos.ActionDTO;
 import com.appsmith.server.dtos.ActionViewDTO;
-import com.appsmith.external.dtos.ExecuteActionDTO;
-import com.appsmith.server.dtos.LayoutActionUpdateDTO;
+import com.appsmith.server.dtos.ExecuteActionDTO;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
@@ -32,7 +31,7 @@ public interface NewActionService extends CrudService<NewAction, String> {
 
     Mono<ActionDTO> findByUnpublishedNameAndPageId(String name, String pageId, AclPermission permission);
 
-    Flux<NewAction> findUnpublishedOnLoadActionsExplicitSetByUserInPage(String pageId);
+    Flux<NewAction> findUnpublishedOnLoadActionsInPage(String pageId);
 
     Flux<NewAction> findUnpublishedActionsInPageByNames(Set<String> names, String pageId);
 
@@ -57,10 +56,4 @@ public interface NewActionService extends CrudService<NewAction, String> {
     Flux<NewAction> saveAll(List<NewAction> actions);
 
     Flux<NewAction> findByPageId(String pageId);
-
-    List<String> extractMustacheKeysInOrder(String query);
-
-    String replaceMustacheWithQuestionMark(String query, List<String> mustacheBindings);
-
-    Mono<Boolean> updateActionsExecuteOnLoad(List<ActionDTO> actions, String pageId, List<LayoutActionUpdateDTO> actionUpdates, List<String> messages);
 }

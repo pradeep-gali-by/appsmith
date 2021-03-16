@@ -15,14 +15,13 @@ const Container = styled.div<{
   savingState: SavingState;
   isInvalid: boolean;
 }>`
-  position: relative;
   .editable-text-container {
     justify-content: center;
   }
 
   &&& .${Classes.EDITABLE_TEXT}, .icon-wrapper {
-    padding: 5px 0px;
-    height: 31px;
+    padding: 5px 10px;
+    height: 25px;
     background-color: ${(props) =>
       (props.isInvalid && props.isEditing) ||
       props.savingState === SavingState.ERROR
@@ -30,14 +29,15 @@ const Container = styled.div<{
         : "transparent"};
   }
 
-  &&&& .${Classes.EDITABLE_TEXT}:hover {
+  &&&& .${Classes.EDITABLE_TEXT} {
     ${(props) =>
       !props.isEditing
         ? `
+      padding-left: 0px;
+      padding-right: 0px;
       border-bottom-style: solid; 
       border-bottom-width: 1px;
       width: fit-content;
-      max-width: 194px;
     `
         : null}
   }
@@ -47,8 +47,6 @@ const Container = styled.div<{
       !props.isEditing
         ? `
         min-width: 0px !important;
-        height: auto !important;
-        line-height: ${props.theme.typography.h4.lineHeight}px !important;
     `
         : null}
   }
@@ -59,15 +57,15 @@ const Container = styled.div<{
     font-size: ${(props) => props.theme.typography.h4.fontSize}px;
     line-height: ${(props) => props.theme.typography.h4.lineHeight}px;
     letter-spacing: ${(props) => props.theme.typography.h4.letterSpacing}px;
-    font-weight: ${(props) => props.theme.typography.h4.fontWeight};
-    padding-right: 0px;
+    font-weight: ${(props) => props.theme.typography.h4.fontWeight}px;
+  }
+
+  .error-message {
+    margin-top: 2px;
   }
 
   .icon-wrapper {
     padding-bottom: 0px;
-    position: absolute;
-    right: 0;
-    top: 0;
   }
 `;
 
@@ -92,10 +90,10 @@ export default function EditableTextWrapper(props: EditableTextWrapperProps) {
         hideEditIcon={props.hideEditIcon}
         isEditingDefault={props.isNewApp}
         savingState={props.savingState}
-        fill={!!props.fill}
+        fill={props.fill}
         onBlur={(value) => {
           setIsEditing(false);
-          props.onBlur && props.onBlur(value);
+          props.onBlur(value);
         }}
         className={props.className}
         onTextChanged={() => setIsEditing(true)}

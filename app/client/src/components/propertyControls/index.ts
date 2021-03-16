@@ -26,19 +26,6 @@ import StepControl, {
 import TabControl from "components/propertyControls/TabControl";
 import ActionSelectorControl from "components/propertyControls/ActionSelectorControl";
 import ColumnActionSelectorControl from "components/propertyControls/ColumnActionSelectorControl";
-import PrimaryColumnsControl from "components/propertyControls/PrimaryColumnsControl";
-import ColorPickerControl, {
-  ColorPickerControlProps,
-} from "components/propertyControls/ColorPickerControl";
-import ComputeTablePropertyControl, {
-  ComputeTablePropertyControlProps,
-} from "components/propertyControls/ComputeTablePropertyControl";
-import IconTabControl, {
-  IconTabControlProps,
-} from "components/propertyControls/IconTabControl";
-import ButtonTabControl, {
-  ButtonTabControlProps,
-} from "components/propertyControls/ButtonTabControl";
 import MultiSwitchControl, {
   MultiSwitchControlProps,
 } from "components/propertyControls/MultiSwitchControl";
@@ -58,11 +45,6 @@ export const PropertyControls = {
   LocationSearchControl,
   StepControl,
   TabControl,
-  ColorPickerControl,
-  PrimaryColumnsControl,
-  IconTabControl,
-  ButtonTabControl,
-  ComputeTablePropertyControl,
 };
 
 export type PropertyControlPropsType =
@@ -73,11 +55,7 @@ export type PropertyControlPropsType =
   | MultiSelectControlProps
   | DatePickerControlProps
   | MultiSwitchControlProps
-  | IconTabControlProps
-  | ButtonTabControlProps
-  | StepControlProps
-  | ColorPickerControlProps
-  | ComputeTablePropertyControlProps;
+  | StepControlProps;
 
 export const getPropertyControlTypes = (): { [key: string]: string } => {
   const _types: { [key: string]: string } = {};

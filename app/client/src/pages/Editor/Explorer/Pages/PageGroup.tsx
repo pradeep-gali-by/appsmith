@@ -1,6 +1,7 @@
 import React, { memo, useCallback } from "react";
 import Entity from "../Entity";
 import { pageGroupIcon } from "../ExplorerIcons";
+import { noop } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import { getNextEntityName } from "utils/AppsmithUtils";
 import { createPage } from "actions/pageActions";
@@ -79,6 +80,7 @@ export const ExplorerPageGroup = memo((props: ExplorerPageGroupProps) => {
       className="group pages"
       icon={pageGroupIcon}
       isDefaultExpanded
+      action={noop}
       entityId="Pages"
       step={props.step}
       onCreate={createPageCallback}

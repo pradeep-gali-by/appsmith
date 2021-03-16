@@ -1,6 +1,3 @@
-import { ErrorActionPayload } from "../sagas/ErrorSagas";
-import { ActionResponse } from "../api/ActionAPI";
-
 export type ExecuteActionPayloadEvent = {
   type: EventType;
   callback?: (result: ExecutionResult) => void;
@@ -21,13 +18,11 @@ export enum EventType {
   ON_PAGE_LOAD = "ON_PAGE_LOAD",
   ON_PREV_PAGE = "ON_PREV_PAGE",
   ON_NEXT_PAGE = "ON_NEXT_PAGE",
-  ON_PAGE_SIZE_CHANGE = "ON_PAGE_SIZE_CHANGE",
   ON_ERROR = "ON_ERROR",
   ON_SUCCESS = "ON_SUCCESS",
   ON_ROW_SELECTED = "ON_ROW_SELECTED",
   ON_SEARCH = "ON_SEARCH",
   ON_CLICK = "ON_CLICK",
-  ON_DATA_POINT_CLICK = "ON_DATA_POINT_CLICK",
   ON_FILES_SELECTED = "ON_FILES_SELECTED",
   ON_HOVER = "ON_HOVER",
   ON_TOGGLE = "ON_TOGGLE",
@@ -35,7 +30,6 @@ export enum EventType {
   ON_TEXT_CHANGE = "ON_TEXT_CHANGE",
   ON_SUBMIT = "ON_SUBMIT",
   ON_CHECK_CHANGE = "ON_CHECK_CHANGE",
-  ON_SWITCH_CHANGE = "ON_SWITCH_CHANGE",
   ON_SELECT = "ON_SELECT",
   ON_DATE_SELECTED = "ON_DATE_SELECTED",
   ON_DATE_RANGE_SELECTED = "ON_DATE_RANGE_SELECTED",
@@ -68,10 +62,11 @@ export interface PageAction {
   timeoutInMillisecond: number;
 }
 
-export interface ExecuteErrorPayload extends ErrorActionPayload {
+export interface ExecuteErrorPayload {
   actionId: string;
+  error: any;
   isPageLoad?: boolean;
-  data: ActionResponse;
+  show?: boolean;
 }
 
 // Group 1 = datasource (https://www.domain.com)

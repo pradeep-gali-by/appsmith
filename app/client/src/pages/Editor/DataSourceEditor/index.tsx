@@ -19,10 +19,8 @@ import {
 import { DATASOURCE_DB_FORM } from "constants/forms";
 import DatasourceHome from "./DatasourceHome";
 import DataSourceEditorForm from "./DBForm";
-import RestAPIDatasourceForm from "./RestAPIDatasourceForm";
 import { Datasource } from "entities/Datasource";
 import { RouteComponentProps } from "react-router";
-import EntityNotFoundPane from "pages/Editor/EntityNotFoundPane";
 
 interface ReduxStateProps {
   formData: Datasource;
@@ -32,12 +30,11 @@ interface ReduxStateProps {
   formConfig: any[];
   loadingFormConfigs: boolean;
   isDeleting: boolean;
-  isNewDatasource: boolean;
+  newDatasource: string;
   pluginImages: Record<string, string>;
   pluginId: string;
   viewMode: boolean;
   pluginType: string;
-  pluginDatasourceForm: string;
 }
 
 type Props = ReduxStateProps &
@@ -84,7 +81,7 @@ class DataSourceEditor extends React.Component<Props> {
       formConfig,
       isDeleting,
       deleteDatasource,
-      isNewDatasource,
+      newDatasource,
       pluginImages,
       pluginId,
       viewMode,
@@ -93,27 +90,39 @@ class DataSourceEditor extends React.Component<Props> {
     } = this.props;
 
     return (
-      <DataSourceEditorForm
-        pluginImage={pluginImages[pluginId]}
-        applicationId={this.props.match.params.applicationId}
-        pageId={this.props.match.params.pageId}
-        isSaving={isSaving}
-        isTesting={isTesting}
-        isDeleting={isDeleting}
-        isNewDatasource={isNewDatasource}
-        onSubmit={this.handleSubmit}
-        onSave={this.handleSave}
-        onTest={this.props.testDatasource}
-        selectedPluginPackage={selectedPluginPackage}
-        datasourceId={datasourceId}
-        loadingFormConfigs={loadingFormConfigs}
-        formData={formData}
-        formConfig={formConfig}
-        handleDelete={deleteDatasource}
-        viewMode={viewMode}
-        setDatasourceEditorMode={setDatasourceEditorMode}
-        pluginType={pluginType}
-      />
+      <React.Fragment>
+        {datasourceId ? (
+          <DataSourceEditorForm
+            pluginImage={pluginImages[pluginId]}
+            applicationId={this.props.match.params.applicationId}
+            pageId={this.props.match.params.pageId}
+            isSaving={isSaving}
+            isTesting={isTesting}
+            isDeleting={isDeleting}
+            isNewDatasource={newDatasource === datasourceId}
+            onSubmit={this.handleSubmit}
+            onSave={this.handleSave}
+            onTest={this.props.testDatasource}
+            selectedPluginPackage={selectedPluginPackage}
+            datasourceId={datasourceId}
+            formData={formData}
+            loadingFormConfigs={loadingFormConfigs}
+            formConfig={formConfig}
+            handleDelete={deleteDatasource}
+            viewMode={viewMode}
+            setDatasourceEditorMode={setDatasourceEditorMode}
+            pluginType={pluginType}
+          />
+        ) : (
+          <DatasourceHome
+            isSaving={isSaving}
+            applicationId={this.props.match.params.applicationId}
+            pageId={this.props.match.params.pageId}
+            history={this.props.history}
+            location={this.props.location}
+          />
+        )}
+      </React.Fragment>
     );
   }
 }
@@ -139,11 +148,9 @@ const mapStateToProps = (state: AppState, props: any): ReduxStateProps => {
     isTesting: datasources.isTesting,
     formConfig: formConfigs[pluginId] || [],
     loadingFormConfigs,
-    isNewDatasource:
-      datasourcePane.newDatasource === props.match.params.datasourceId,
+    newDatasource: datasourcePane.newDatasource,
     viewMode: datasourcePane.viewMode[datasource?.id ?? ""] ?? true,
     pluginType: plugin?.type ?? "",
-    pluginDatasourceForm: plugin?.datasourceComponent ?? "AutoForm",
   };
 };
 
@@ -168,59 +175,4 @@ export interface DatasourcePaneFunctions {
   setDatasourceEditorMode: (id: string, viewMode: boolean) => void;
 }
 
-class DatasourceEditorRouter extends React.Component<Props> {
-  render() {
-    const {
-      match: {
-        params: { datasourceId, applicationId, pageId },
-      },
-      isSaving,
-      history,
-      isDeleting,
-      location,
-      isNewDatasource,
-      pluginImages,
-      pluginId,
-      pluginDatasourceForm,
-    } = this.props;
-    if (!pluginId && datasourceId) {
-      return <EntityNotFoundPane />;
-    }
-    if (!datasourceId) {
-      return (
-        <DatasourceHome
-          isSaving={isSaving}
-          applicationId={applicationId}
-          pageId={pageId}
-          history={history}
-          location={location}
-        />
-      );
-    }
-
-    // Check for specific form types first
-    if (pluginDatasourceForm === "RestAPIDatasourceForm") {
-      return (
-        <RestAPIDatasourceForm
-          pluginImage={pluginImages[pluginId]}
-          applicationId={this.props.match.params.applicationId}
-          datasourceId={datasourceId}
-          pageId={this.props.match.params.pageId}
-          isSaving={isSaving}
-          isDeleting={isDeleting}
-          isNewDatasource={isNewDatasource}
-          location={location}
-        />
-      );
-    }
-
-    // Default to old flow
-    // Todo: later refactor to make this "AutoForm"
-    return <DataSourceEditor {...this.props} />;
-  }
-}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(DatasourceEditorRouter);
+export default connect(mapStateToProps, mapDispatchToProps)(DataSourceEditor);

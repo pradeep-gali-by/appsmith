@@ -1,8 +1,8 @@
-import _, { isString } from "lodash";
+import _ from "lodash";
 import React from "react";
 import styled from "styled-components";
 
-import { getBorderCSSShorthand, invisible } from "constants/DefaultTheme";
+import { invisible } from "constants/DefaultTheme";
 import { getAppsmithConfigs } from "configs";
 import { ChartType, ChartData, ChartDataPoint } from "widgets/ChartWidget";
 
@@ -28,16 +28,15 @@ export interface ChartComponentProps {
   widgetId: string;
   isVisible?: boolean;
   allowHorizontalScroll: boolean;
-  onDataPointClick: (selectedDataPoint: { x: any; y: any }) => void;
 }
 
 const CanvasContainer = styled.div<ChartComponentProps>`
-  border: ${(props) => getBorderCSSShorthand(props.theme.borders[2])};
-  border-radius: 0;
+  border: none;
+  border-radius: ${(props) => `${props.theme.radii[1]}px`};
   height: 100%;
   width: 100%;
   background: white;
-  overflow: hidden;
+  box-shadow: 0 1px 1px 0 rgba(60,75,100,.14),0 2px 1px -1px rgba(60,75,100,.12),0 1px 3px 0 rgba(60,75,100,.2);
   position: relative;
   ${(props) => (!props.isVisible ? invisible : "")};
   padding: 10px 0 0 0;
@@ -90,15 +89,7 @@ class ChartComponent extends React.Component<ChartComponentProps> {
         },
       ];
     }
-
-    let data: ChartDataPoint[] = chartData[0].data;
-    if (isString(chartData[0].data)) {
-      try {
-        data = JSON.parse(chartData[0].data);
-      } catch (e) {
-        data = [];
-      }
-    }
+    const data: ChartDataPoint[] = chartData[0].data;
     if (data.length === 0) {
       return [
         {
@@ -242,15 +233,6 @@ class ChartComponent extends React.Component<ChartComponentProps> {
       height: "100%",
       dataFormat: "json",
       dataSource: dataSource,
-      events: {
-        dataPlotClick: (evt: any) => {
-          const data = evt.data;
-          this.props.onDataPointClick({
-            x: data.categoryLabel,
-            y: data.dataValue,
-          });
-        },
-      },
     };
     this.chartInstance = new FusionCharts(chartConfig);
   };

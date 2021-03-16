@@ -4,29 +4,15 @@
  */
 import { Component } from "react";
 import _ from "lodash";
-import { PropertyPaneControlConfig } from "constants/PropertyControlConstants";
-
+import { ControlType } from "constants/PropertyControlConstants";
 // eslint-disable-next-line @typescript-eslint/ban-types
 abstract class BaseControl<P extends ControlProps, S = {}> extends Component<
   P,
   S
 > {
-  updateProperty(
-    propertyName: string,
-    propertyValue: any,
-    isDynamicTrigger?: boolean,
-  ) {
+  updateProperty(propertyName: string, propertyValue: any) {
     if (!_.isNil(this.props.onPropertyChange))
-      this.props.onPropertyChange(
-        propertyName,
-        propertyValue,
-        isDynamicTrigger,
-      );
-  }
-  deleteProperties(propertyPaths: string[]) {
-    if (this.props.deleteProperties) {
-      this.props.deleteProperties(propertyPaths);
-    }
+      this.props.onPropertyChange(propertyName, propertyValue);
   }
 }
 
@@ -36,26 +22,26 @@ export interface ControlBuilder<T extends ControlProps> {
 
 export interface ControlProps extends ControlData, ControlFunctions {
   key?: string;
-  additionalAutoComplete?: Record<string, Record<string, unknown>>;
 }
-export interface ControlData
-  extends Omit<PropertyPaneControlConfig, "additionalAutoComplete"> {
+
+export interface ControlData {
+  id: string;
+  label: string;
+  propertyName: string;
+  helpText?: string;
+  isJSConvertible?: boolean;
+  controlType: ControlType;
   propertyValue?: any;
   isValid: boolean;
   errorMessage?: string;
   expected: string;
   evaluatedValue: any;
   validationMessage?: string;
-  widgetProperties: any;
+  dataTreePath?: string;
 }
+
 export interface ControlFunctions {
-  onPropertyChange?: (
-    propertyName: string,
-    propertyValue: string,
-    isDynamicTrigger?: boolean,
-  ) => void;
-  openNextPanel: (props: any) => void;
-  deleteProperties: (propertyPaths: string[]) => void;
+  onPropertyChange?: (propertyName: string, propertyValue: string) => void;
 }
 
 export default BaseControl;

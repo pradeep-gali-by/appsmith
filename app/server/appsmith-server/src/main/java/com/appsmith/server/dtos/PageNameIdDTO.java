@@ -11,6 +11,4 @@ public class PageNameIdDTO {
     String name;
 
     Boolean isDefault;
-
-    Boolean isHidden;
 }

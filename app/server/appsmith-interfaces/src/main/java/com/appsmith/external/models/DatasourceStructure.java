@@ -8,7 +8,6 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class DatasourceStructure {
 
     List<Table> tables;

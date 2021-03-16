@@ -86,7 +86,7 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
         exampleOrg.setPolicies(null);
 
         return organizationRepository.findOne(Example.of(exampleOrg))
-                .switchIfEmpty(Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.ORGANIZATION, orgId)))
+                .switchIfEmpty(Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, "organization", orgId)))
                 .zipWith(currentUserMono)
                 .map(tuple -> {
                     Organization organization = tuple.getT1();
@@ -204,7 +204,7 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
     public Mono<Organization> removeUserRoleFromOrganizationGivenUserObject(Organization organization, User user) {
         List<UserRole> userRoles = organization.getUserRoles();
         if (userRoles == null) {
-            return Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.USER + " in organization", organization.getName()));
+            return Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.USER));
         }
 
         AppsmithRole role = null;
@@ -219,7 +219,7 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
 
         // The user was not found in the organization.
         if (role == null) {
-            return Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.USER + " in organization", organization.getName()));
+            return Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.USER));
         }
 
         // Generate all the policies for Organization, Application, Page and Actions
@@ -259,8 +259,7 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
 
         Mono<Organization> organizationMono = organizationRepository
                 .findById(orgId, MANAGE_ORGANIZATIONS)
-                .switchIfEmpty(Mono.error(new AppsmithException(AppsmithError.ACTION_IS_NOT_AUTHORIZED,
-                        "Change role of a member")));
+                .switchIfEmpty(Mono.error(new AppsmithException(AppsmithError.ACTION_IS_NOT_AUTHORIZED)));
         Mono<User> userMono = userRepository.findByEmail(userRole.getUsername());
         Mono<User> currentUserMono = sessionUserService.getCurrentUser();
 
@@ -317,8 +316,7 @@ public class UserOrganizationServiceImpl implements UserOrganizationService {
                         }
                     }
                     // The user was not found in the organization. Return an error
-                    return Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.USER, user.getUsername()
-                            + " in the organization " + organization.getName()));
+                    return Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.USER, user.getId()));
                 });
     }
 

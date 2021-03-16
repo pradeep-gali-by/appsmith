@@ -45,7 +45,6 @@ export interface ApiActionConfig extends ActionConfig {
   httpMethod: string;
   path?: string;
   body?: JSON | string | Record<string, any> | null;
-  encodeParamsToggle: boolean;
   queryParameters?: Property[];
   bodyFormData?: BodyFormData[];
 }
@@ -108,14 +107,5 @@ export interface QueryAction extends BaseAction {
   actionConfiguration: QueryActionConfig;
   datasource: StoredDatasource;
 }
-
-export type ActionViewMode = {
-  id: string;
-  name: string;
-  pageId: string;
-  jsonPathKeys: string[];
-  confirmBeforeExecute?: boolean;
-  timeoutInMillisecond?: number;
-};
 
 export type Action = ApiAction | QueryAction;

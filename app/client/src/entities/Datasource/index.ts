@@ -62,7 +62,7 @@ export interface Datasource extends BaseDatasource {
   datasourceConfiguration: {
     url: string;
     authentication?: DatasourceAuthentication;
-    properties?: Property[];
+    properties?: Record<string, string>;
     headers?: Property[];
     databaseName?: string;
   };

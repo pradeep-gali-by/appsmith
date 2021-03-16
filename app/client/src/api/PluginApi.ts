@@ -9,7 +9,6 @@ export interface Plugin {
   packageName: string;
   iconLocation?: string;
   uiComponent: "ApiEditorForm" | "RapidApiEditorForm" | "DbEditorForm";
-  datasourceComponent: "RestAPIDatasourceForm" | "AutoForm";
   allowUserDatasources?: boolean;
   templates: Record<string, string>;
   responseType?: "TABLE" | "JSON";

@@ -1,6 +1,6 @@
 import { CommonComponentProps } from "./common";
 
-export type TagProps = CommonComponentProps & {
+type TagProps = CommonComponentProps & {
   onClick: (text: string) => void;
   text: boolean;
   variant?: "success" | "info" | "warning" | "danger"; //default info

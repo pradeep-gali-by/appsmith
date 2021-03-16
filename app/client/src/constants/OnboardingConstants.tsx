@@ -1,57 +1,34 @@
-import { ReduxActionTypes } from "./ReduxActionConstants";
-import HandwaveGif from "assets/gifs/handwave.gif";
-import DeployGif from "assets/gifs/deploy_orange.gif";
-import InputDragGif from "assets/gifs/input_drag.gif";
-import SuperHeroGif from "assets/gifs/super_hero.gif";
-import { Dispatch } from "redux";
-import { setOnboardingWelcomeState } from "utils/storage";
-import AnalyticsUtil from "utils/AnalyticsUtil";
-import { showOnboardingLoader } from "actions/onboardingActions";
+import { ReduxAction, ReduxActionTypes } from "./ReduxActionConstants";
+import { showTooltip } from "actions/onboardingActions";
 
 export enum OnboardingStep {
   NONE = -1,
   WELCOME = 0,
   EXAMPLE_DATABASE = 1,
-  RUN_QUERY_SUCCESS = 2,
-  SUCCESSFUL_BINDING = 3,
-  ADD_INPUT_WIDGET = 4,
-  DEPLOY = 5,
-  FINISH = 6,
+  RUN_QUERY = 2,
+  RUN_QUERY_SUCCESS = 3,
+  ADD_WIDGET = 4,
+  SUCCESSFUL_BINDING = 5,
+  DEPLOY = 6,
+  FINISH = 7,
 }
 
-export type OnboardingHelperConfig = {
-  step?: number;
+export type OnboardingTooltip = {
   title: string;
   description?: string;
-  subSteps?: { description: string }[];
-  skipLabel?: string;
-  hint?: {
-    description: string;
-    snippet: string;
-  };
-  image?: {
-    src: string;
-  };
   action?: {
     label: string;
-    // action to be dispatched
-    action?: (dispatch?: Dispatch<any>) => void;
-    initialStep?: boolean;
+    action?: ReduxAction<OnboardingStep>;
   };
-  secondaryAction?: {
-    label: string;
-    action?: { type: string; payload?: any };
-  };
-  cheatAction?: {
-    label: string;
-    action: { type: string; payload?: any };
-  };
+  onClickOutside?: ReduxAction<any>;
+  snippet?: string;
+  isFinalStep?: boolean;
 };
 
 export type OnboardingStepConfig = {
   name: string;
   setup: () => { type: string; payload?: any }[];
-  helper?: OnboardingHelperConfig;
+  tooltip: OnboardingTooltip;
 };
 
 export const OnboardingConfig: Record<OnboardingStep, OnboardingStepConfig> = {
@@ -60,34 +37,25 @@ export const OnboardingConfig: Record<OnboardingStep, OnboardingStepConfig> = {
     setup: () => {
       return [];
     },
+    tooltip: {
+      title: "",
+      description: "",
+    },
   },
   [OnboardingStep.WELCOME]: {
     name: "WELCOME",
     setup: () => {
       // To setup the state if any
       // Return action that needs to be dispatched
-      return [showOnboardingLoader(true)];
-    },
-    helper: {
-      title: "👋 Welcome to Appsmith!",
-      description:
-        "We'd like to show you around! Let's build an app for remote teams to do async meeting updates.",
-      skipLabel: "No thanks",
-      image: {
-        src: HandwaveGif,
-      },
-      action: {
-        label: "Let’s go",
-        action: (dispatch) => {
-          if (dispatch) {
-            dispatch({
-              type: ReduxActionTypes.ONBOARDING_CREATE_APPLICATION,
-            });
-          }
-          setOnboardingWelcomeState(false);
+      return [
+        {
+          type: ReduxActionTypes.SHOW_WELCOME,
         },
-        initialStep: true,
-      },
+      ];
+    },
+    tooltip: {
+      title: "",
+      description: "",
     },
   },
   [OnboardingStep.EXAMPLE_DATABASE]: {
@@ -102,28 +70,19 @@ export const OnboardingConfig: Record<OnboardingStep, OnboardingStepConfig> = {
         },
       ];
     },
-    helper: {
-      step: 1,
-      title: "Query the Super Updates DB",
-      subSteps: [
-        {
-          description:
-            "Create a new query that can fetch standup updates from across the multiverse",
-        },
-        {
-          description: "Hit Run to check it's response",
-        },
-      ],
-      image: {
-        src:
-          "https://res.cloudinary.com/drako999/image/upload/v1611839705/Appsmith/Onboarding/new_query.gif",
-      },
-      cheatAction: {
-        label: "Do it for me",
-        action: {
-          type: ReduxActionTypes.ONBOARDING_CREATE_QUERY,
-        },
-      },
+    tooltip: {
+      title:
+        "We’ve connected to an example Postgres database. You can now query it.",
+    },
+  },
+  [OnboardingStep.RUN_QUERY]: {
+    name: "RUN_QUERY",
+    setup: () => {
+      return [];
+    },
+    tooltip: {
+      title:
+        "This is where you query data. Here’s one that fetches a list of users stored in the DB.",
     },
   },
   [OnboardingStep.RUN_QUERY_SUCCESS]: {
@@ -138,28 +97,20 @@ export const OnboardingConfig: Record<OnboardingStep, OnboardingStepConfig> = {
         },
       ];
     },
-    helper: {
-      step: 2,
-      title: "Build the Standup Dashboard",
-      subSteps: [
-        {
-          description: "Click the add widget button to open the widgets panel",
-        },
-        {
-          description:
-            "Drag a table so that heroes can view each other's updates.",
-        },
-      ],
-      image: {
-        src:
-          "https://res.cloudinary.com/drako999/image/upload/v1611839705/Appsmith/Onboarding/addwidget.gif",
-      },
-      cheatAction: {
-        label: "Do it for me",
-        action: {
-          type: ReduxActionTypes.ONBOARDING_ADD_TABLE_WIDGET,
-        },
-      },
+    tooltip: {
+      title:
+        "This is the response from your query. Now let’s connect it to a UI widget.",
+    },
+  },
+  [OnboardingStep.ADD_WIDGET]: {
+    name: "ADD_WIDGET",
+    setup: () => {
+      return [];
+    },
+    tooltip: {
+      title:
+        "Your first widget 🎉 Copy the snippet below and paste it inside TableData to see the magic",
+      snippet: "{{ExampleQuery.data}}",
     },
   },
   [OnboardingStep.SUCCESSFUL_BINDING]: {
@@ -167,66 +118,11 @@ export const OnboardingConfig: Record<OnboardingStep, OnboardingStepConfig> = {
     setup: () => {
       return [];
     },
-    helper: {
-      step: 3,
-      title: "Connect Real Data",
-      subSteps: [
-        {
-          description:
-            "Use your javascript superpowers to populate the static TableData with live query results.",
-        },
-      ],
-      hint: {
-        description: "Use the snippet below inside TableData",
-        snippet: "{{fetch_standup_updates.data}}",
-      },
-      image: {
-        src:
-          "https://res.cloudinary.com/drako999/image/upload/v1611906837/Appsmith/Onboarding/property_pane.gif",
-      },
-      action: {
-        label: "Show me how",
-        action: () => {
-          AnalyticsUtil.logEvent("ONBOARDING_BINDING_HINT");
-        },
-      },
-      cheatAction: {
-        label: "Do it for me",
-        action: {
-          type: ReduxActionTypes.ONBOARDING_ADD_TABLEDATA_BINDING,
-        },
-      },
-    },
-  },
-  [OnboardingStep.ADD_INPUT_WIDGET]: {
-    name: "ADD_INPUT_WIDGET",
-    setup: () => [
-      {
-        type: ReduxActionTypes.LISTEN_ADD_INPUT_WIDGET,
-      },
-    ],
-    helper: {
-      step: 4,
-      title: "Capture Hero Updates",
-      subSteps: [
-        {
-          description:
-            "Drag an input so that heroes can enter their daily updates.",
-        },
-        {
-          description:
-            "Create a query in the OnSubmit action to insert a standup_update.",
-        },
-      ],
-      image: {
-        src: InputDragGif,
-      },
-      cheatAction: {
-        label: "Do it for me",
-        action: {
-          type: ReduxActionTypes.ONBOARDING_ADD_INPUT_WIDGET,
-        },
-      },
+    tooltip: {
+      title: "Your widget is now talking to your data 👌👏",
+      description:
+        "You can access widgets and actions as JS variables anywhere inside {{ }}",
+      onClickOutside: showTooltip(OnboardingStep.DEPLOY),
     },
   },
   [OnboardingStep.DEPLOY]: {
@@ -238,18 +134,9 @@ export const OnboardingConfig: Record<OnboardingStep, OnboardingStepConfig> = {
         },
       ];
     },
-    helper: {
-      step: 5,
-      title: "Deploy the Standup Dashboard to save the world from meetings!",
-      image: {
-        src: DeployGif,
-      },
-      cheatAction: {
-        label: "Do it for me",
-        action: {
-          type: ReduxActionTypes.ONBOARDING_DEPLOY,
-        },
-      },
+    tooltip: {
+      title: "You’re almost done! Just Hit Deploy",
+      isFinalStep: true,
     },
   },
   // Final step
@@ -258,43 +145,8 @@ export const OnboardingConfig: Record<OnboardingStep, OnboardingStepConfig> = {
     setup: () => {
       return [];
     },
-    helper: {
-      title:
-        "Great Job! You built an app that saves your team from boring meetings",
-      description: "WHAT YOU’VE LEARNT",
-      subSteps: [
-        {
-          description: "Query a database directly",
-        },
-        {
-          description: "Build a dashboard without HTML/CSS",
-        },
-        {
-          description: "Read/Write data to the UI using JS",
-        },
-        {
-          description: "Deploy an app with a Click",
-        },
-      ],
-      image: {
-        src: SuperHeroGif,
-      },
-      secondaryAction: {
-        label: "Back Home",
-        action: {
-          type: ReduxActionTypes.ONBOARDING_RETURN_HOME,
-        },
-      },
-      action: {
-        label: "Next Mission",
-        action: () => {
-          window.open(
-            "https://docs.appsmith.com/v/v1.2.1/tutorial-1",
-            "_blank",
-          );
-          AnalyticsUtil.logEvent("ONBOARDING_NEXT_MISSION");
-        },
-      },
+    tooltip: {
+      title: "",
     },
   },
 };

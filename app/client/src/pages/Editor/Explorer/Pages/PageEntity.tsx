@@ -73,7 +73,6 @@ export const ExplorerPageEntity = memo((props: ExplorerPageEntityProps) => {
       updateEntityName={updatePage}
       contextMenu={contextMenu}
       onNameEdit={resolveAsSpaceChar}
-      searchKeyword={props.searchKeyword}
     >
       <ExplorerWidgetGroup
         step={props.step + 1}

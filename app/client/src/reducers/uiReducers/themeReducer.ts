@@ -1,8 +1,11 @@
 import { createImmerReducer } from "utils/AppsmithUtils";
 import { ReduxAction, ReduxActionTypes } from "constants/ReduxActionConstants";
-import { dark, light, theme } from "constants/DefaultTheme";
-import { ThemeMode } from "../../selectors/themeSelectors";
+import { theme, light, dark } from "constants/DefaultTheme";
 
+export enum ThemeMode {
+  LIGHT = "LIGHT",
+  DARK = "DARK",
+}
 const initialState: ThemeState = {
   mode: ThemeMode.DARK,
   theme: {

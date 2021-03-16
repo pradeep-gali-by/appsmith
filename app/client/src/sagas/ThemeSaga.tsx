@@ -1,7 +1,6 @@
 import { ReduxActionTypes, ReduxAction } from "constants/ReduxActionConstants";
 import { takeLatest } from "redux-saga/effects";
-import localStorage from "utils/localStorage";
-import { ThemeMode } from "../selectors/themeSelectors";
+import { ThemeMode } from "reducers/uiReducers/themeReducer";
 
 export function* setThemeSaga(actionPayload: ReduxAction<ThemeMode>) {
   yield localStorage.setItem("THEME", actionPayload.payload);

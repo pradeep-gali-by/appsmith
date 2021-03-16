@@ -190,8 +190,9 @@ const actionsReducer = createReducer(initialState, {
   ): ActionDataState =>
     state.map((a) => {
       if (a.config.id === action.payload.actionId) {
-        return { ...a, isLoading: false, data: action.payload.data };
+        return { ...a, isLoading: false, data: action.payload.error };
       }
+
       return a;
     }),
   [ReduxActionTypes.RUN_ACTION_REQUEST]: (
@@ -339,20 +340,12 @@ const actionsReducer = createReducer(initialState, {
     }),
   [ReduxActionTypes.SET_ACTION_TO_EXECUTE_ON_PAGELOAD]: (
     state: ActionDataState,
-    action: ReduxAction<
-      Array<{
-        executeOnLoad: boolean;
-        id: string;
-        name: string;
-      }>
-    >,
+    actionIds: ReduxAction<string[]>,
   ) => {
     return produce(state, (draft) => {
-      const actionUpdateSearch = _.keyBy(action.payload, "id");
       draft.forEach((action, index) => {
-        if (action.config.id in actionUpdateSearch) {
-          draft[index].config.executeOnLoad =
-            actionUpdateSearch[action.config.id].executeOnLoad;
+        if (actionIds.payload.indexOf(action.config.id) > -1) {
+          draft[index].config.executeOnLoad = true;
         }
       });
     });

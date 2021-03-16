@@ -25,7 +25,7 @@ const QueryHomePage = styled.div`
   overflow: auto;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - ${(props) => props.theme.smallHeaderHeight});
+  height: calc(100vh - ${(props) => props.theme.headerHeight});
 
   .sectionHeader {
     font-weight: ${(props) => props.theme.fontWeights[2]};
@@ -93,7 +93,6 @@ class QueryHomeScreen extends React.Component<QueryHomeScreenProps> {
           from: "home-screen",
           dataSource: dataSource.name,
         },
-        pluginId: dataSource.pluginId,
         actionConfiguration: {},
       });
     }

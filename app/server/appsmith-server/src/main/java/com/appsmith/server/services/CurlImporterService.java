@@ -3,7 +3,6 @@ package com.appsmith.server.services;
 import com.appsmith.external.models.ActionConfiguration;
 import com.appsmith.external.models.DatasourceConfiguration;
 import com.appsmith.external.models.Property;
-import com.appsmith.server.constants.FieldName;
 import com.appsmith.server.domains.Datasource;
 import com.appsmith.server.domains.Plugin;
 import com.appsmith.server.dtos.ActionDTO;
@@ -54,9 +53,6 @@ public class CurlImporterService extends BaseApiImporter {
         ActionDTO action;
 
         try {
-            if (input == null) {
-                throw new AppsmithException(AppsmithError.INVALID_PARAMETER, FieldName.CURL_CODE);
-            }
             action = curlToAction((String) input, pageId, name);
         } catch (AppsmithException e) {
             return Mono.error(e);

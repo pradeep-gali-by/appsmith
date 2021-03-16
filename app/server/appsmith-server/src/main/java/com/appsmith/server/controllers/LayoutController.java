@@ -2,7 +2,6 @@ package com.appsmith.server.controllers;
 
 import com.appsmith.server.constants.Url;
 import com.appsmith.server.domains.Layout;
-import com.appsmith.server.dtos.LayoutDTO;
 import com.appsmith.server.dtos.RefactorNameDTO;
 import com.appsmith.server.dtos.ResponseDTO;
 import com.appsmith.server.services.LayoutActionService;
@@ -47,7 +46,7 @@ public class LayoutController {
     }
 
     @PutMapping("/{layoutId}/pages/{pageId}")
-    public Mono<ResponseDTO<LayoutDTO>> updateLayout(@PathVariable String pageId, @PathVariable String layoutId, @RequestBody Layout layout) {
+    public Mono<ResponseDTO<Layout>> updateLayout(@PathVariable String pageId, @PathVariable String layoutId, @RequestBody Layout layout) {
         return layoutActionService.updateLayout(pageId, layoutId, layout)
                 .map(created -> new ResponseDTO<>(HttpStatus.OK.value(), created, null));
     }
@@ -59,7 +58,7 @@ public class LayoutController {
     }
 
     @PutMapping("/refactor")
-    public Mono<ResponseDTO<LayoutDTO>> refactorWidgetName(@RequestBody RefactorNameDTO refactorNameDTO) {
+    public Mono<ResponseDTO<Layout>> refactorWidgetName(@RequestBody RefactorNameDTO refactorNameDTO) {
         return layoutActionService.refactorWidgetName(refactorNameDTO)
                 .map(created -> new ResponseDTO<>(HttpStatus.OK.value(), created, null));
     }

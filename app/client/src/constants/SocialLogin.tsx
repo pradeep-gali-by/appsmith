@@ -3,8 +3,7 @@ import {
   GithubOAuthURL,
   OIDCOAuthURL,
 } from "constants/ApiConstants";
-import GithubLogo from "assets/images/Github_inverted.png";
-
+import GithubLogo from "assets/images/Github.png";
 import GoogleLogo from "assets/images/Google.png";
 import OIDCLogo from "assets/images/no_image.png";
 export type SocialLoginButtonProps = {

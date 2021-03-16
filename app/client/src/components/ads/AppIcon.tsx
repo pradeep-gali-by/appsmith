@@ -193,11 +193,6 @@ const appSizeHandler = (size: Size): cssAttributes => {
       height = 50;
       padding = 50;
       break;
-    default:
-      width = 20;
-      height = 20;
-      padding = 5;
-      break;
   }
   return { width, height, padding };
 };

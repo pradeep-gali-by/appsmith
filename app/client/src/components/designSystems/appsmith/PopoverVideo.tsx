@@ -35,7 +35,7 @@ const PopoverVideo = (props: VideoComponentProps) => {
         minimal
         usePortal
         enforceFocus={false}
-        lazy
+        lazy={true}
         modifiers={{
           flip: {
             behavior: ["right", "left", "bottom", "top"],

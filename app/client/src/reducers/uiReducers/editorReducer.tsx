@@ -93,7 +93,7 @@ const editorReducer = createReducer(initialState, {
     state.loadingStates.savingError = true;
     return { ...state };
   },
-  [ReduxActionTypes.INIT_CANVAS_LAYOUT]: (
+  [ReduxActionTypes.UPDATE_CANVAS]: (
     state: EditorReduxState,
     action: ReduxAction<UpdateCanvasPayload>,
   ) => {

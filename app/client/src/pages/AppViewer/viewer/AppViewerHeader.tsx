@@ -1,9 +1,10 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useRef, useEffect, useState } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import styled, { ThemeProvider } from "styled-components";
+import styled from "styled-components";
 import StyledHeader from "components/designSystems/appsmith/StyledHeader";
-import AppsmithLogo from "assets/images/appsmith_logo.png";
+import AppsmithLogo from "assets/images/appsmith_logo_white.png";
+import Button from "components/editorComponents/Button";
 import { EDIT_APP, FORK_APP, SIGN_IN } from "constants/messages";
 import {
   isPermitted,
@@ -16,6 +17,7 @@ import {
 import {
   APPLICATIONS_URL,
   AUTH_LOGIN_URL,
+  getApplicationViewerPageURL,
   SIGN_UP_URL,
 } from "constants/routes";
 import { connect } from "react-redux";
@@ -25,58 +27,19 @@ import { getPageList } from "selectors/editorSelectors";
 import { FormDialogComponent } from "components/editorComponents/form/FormDialogComponent";
 import AppInviteUsersForm from "pages/organization/AppInviteUsersForm";
 import { getCurrentOrgId } from "selectors/organizationSelectors";
-
+import { HeaderIcons } from "icons/HeaderIcons";
+import { Colors } from "constants/Colors";
 import { getCurrentUser } from "selectors/usersSelectors";
 import { ANONYMOUS_USERNAME, User } from "constants/userConstants";
-import Text, { TextType } from "components/ads/Text";
-import { Classes } from "components/ads/common";
-import { getTypographyByKey, Theme } from "constants/DefaultTheme";
-import { IconWrapper } from "components/ads/Icon";
-import Button, { Size } from "components/ads/Button";
-import ProfileDropdown from "pages/common/ProfileDropdown";
-import { Profile } from "pages/common/ProfileImage";
-import PageTabsContainer from "./PageTabsContainer";
-import { getThemeDetails, ThemeMode } from "selectors/themeSelectors";
+import { isEllipsisActive } from "utils/helpers";
+import TooltipComponent from "components/ads/Tooltip";
 
 const HeaderWrapper = styled(StyledHeader)<{ hasPages: boolean }>`
-  box-shadow: unset;
-  height: unset;
-  padding: 0;
-  background-color: ${(props) => props.theme.colors.header.background};
+  background: ${Colors.BALTIC_SEA};
+  height: ${(props) => (props.hasPages ? "90px" : "48px")};
   color: white;
   flex-direction: column;
-  .${Classes.TEXT} {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    ${(props) => getTypographyByKey(props, "h4")}
-    color: ${(props) => props.theme.colors.header.appName};
-  }
-
-  & .header__application-share-btn {
-    background-color: ${(props) => props.theme.colors.header.background};
-    border-color: ${(props) => props.theme.colors.header.background};
-    color: ${(props) => props.theme.colors.header.shareBtn};
-    ${IconWrapper} path {
-      fill: ${(props) => props.theme.colors.header.shareBtn};
-    }
-  }
-
-  & .header__application-share-btn:hover {
-    color: ${(props) => props.theme.colors.header.shareBtnHighlight};
-    ${IconWrapper} path {
-      fill: ${(props) => props.theme.colors.header.shareBtnHighlight};
-    }
-  }
-
-  & ${Profile} {
-    width: 24px;
-    height: 24px;
-  }
-
-  & .current-app-name {
-    overflow: auto;
-  }
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.05);
 `;
 
 const HeaderRow = styled.div<{ justify: string }>`
@@ -85,9 +48,6 @@ const HeaderRow = styled.div<{ justify: string }>`
   flex: 1;
   flex-direction: row;
   justify-content: ${(props) => props.justify};
-  height: ${(props) => `calc(${props.theme.smallHeaderHeight})`};
-  border-bottom: 1px solid
-    ${(props) => props.theme.colors.header.tabsHorizontalSeparator};
 `;
 
 const HeaderSection = styled.div<{ justify: string }>`
@@ -98,31 +58,73 @@ const HeaderSection = styled.div<{ justify: string }>`
 `;
 
 const AppsmithLogoImg = styled.img`
-  padding-left: ${(props) => props.theme.spaces[7]}px;
   max-width: 110px;
 `;
 
-const Cta = styled(Button)`
-  ${(props) => getTypographyByKey(props, "btnLarge")}
-  height: 100%;
+const BackToEditorButton = styled(Button)`
+  max-width: 200px;
+  height: 32px;
+  margin: 5px 10px;
 `;
 
-const ForkButton = styled(Cta)`
+const ForkButton = styled(Button)`
+  max-width: 200px;
+  height: 32px;
+  margin: 5px 10px;
   svg {
     transform: rotate(-90deg);
   }
 `;
 
-const HeaderRightItemContainer = styled.div`
-  display: flex;
-  align-items: center;
-  margin-right: ${(props) => props.theme.spaces[7]}px;
-  height: 100%;
+const ShareButton = styled(Button)`
+  height: 32px;
+  margin: 5px 10px;
+  color: white !important;
 `;
 
-const PrimaryLogoLink = styled(Link)`
+const StyledApplicationName = styled.span`
+  font-size: 15px;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 14px;
+`;
+
+const PageTab = styled(NavLink)`
   display: flex;
+  height: 30px;
+  max-width: 170px;
+  margin-right: 1px;
+  align-self: flex-end;
+  cursor: pointer;
   align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background-color: rgb(49, 48, 51);
+  padding: 0px 10px;
+  && span {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 20px;
+    letter-spacing: 0.04em;
+    color: #fff;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &&&:hover {
+    text-decoration: none;
+    background-color: #fff;
+    span {
+      color: #2e3d49;
+    }
+  }
+  &&&.is-active {
+    background-color: white;
+    span {
+      color: #2e3d49;
+    }
+  }
 `;
 
 type AppViewerHeaderProps = {
@@ -131,7 +133,26 @@ type AppViewerHeaderProps = {
   pages: PageListPayload;
   currentOrgId: string;
   currentUser?: User;
-  lightTheme: Theme;
+};
+
+const PageTabName: React.FunctionComponent<{ name: string }> = ({ name }) => {
+  const tabNameRef = useRef<HTMLSpanElement>(null);
+  const [ellipsisActive, setEllipsisActive] = useState(false);
+  const tabNameText = <span ref={tabNameRef}>{name}</span>;
+
+  useEffect(() => {
+    if (isEllipsisActive(tabNameRef?.current)) {
+      setEllipsisActive(true);
+    }
+  }, [tabNameRef]);
+
+  return ellipsisActive ? (
+    <TooltipComponent maxWidth={400} content={name}>
+      {tabNameText}
+    </TooltipComponent>
+  ) : (
+    <>{tabNameText}</>
+  );
 };
 
 export const AppViewerHeader = (props: AppViewerHeaderProps) => {
@@ -140,11 +161,8 @@ export const AppViewerHeader = (props: AppViewerHeaderProps) => {
   const userPermissions = currentApplicationDetails?.userPermissions ?? [];
   const permissionRequired = PERMISSION_TYPE.MANAGE_APPLICATION;
   const canEdit = isPermitted(userPermissions, permissionRequired);
-  const { search } = useLocation();
-  const queryParams = new URLSearchParams(search);
-  const isEmbed = queryParams.get("embed");
-  const hideHeader = !!isEmbed;
-
+  const queryParams = new URLSearchParams(useLocation().search);
+  const hideHeader = !!queryParams.get("embed");
   const HtmlTitle = () => {
     if (!currentApplicationDetails?.name) return null;
     return (
@@ -154,6 +172,16 @@ export const AppViewerHeader = (props: AppViewerHeaderProps) => {
     );
   };
   if (hideHeader) return <HtmlTitle />;
+  // Mark default page as first page
+  const appPages = pages;
+  if (appPages.length > 1) {
+    appPages.forEach(function(item, i) {
+      if (item.isDefault) {
+        appPages.splice(i, 1);
+        appPages.unshift(item);
+      }
+    });
+  }
 
   const forkAppUrl = `${window.location.origin}${SIGN_UP_URL}?appId=${currentApplicationDetails?.id}`;
   const loginAppUrl = `${window.location.origin}${AUTH_LOGIN_URL}?appId=${currentApplicationDetails?.id}`;
@@ -162,11 +190,14 @@ export const AppViewerHeader = (props: AppViewerHeaderProps) => {
 
   if (props.url && canEdit) {
     CTA = (
-      <Cta
+      <BackToEditorButton
         className="t--back-to-editor"
         href={props.url}
+        intent="primary"
         icon="arrow-left"
+        iconAlignment="left"
         text={EDIT_APP}
+        filled
       />
     );
   } else if (isExampleApp) {
@@ -174,77 +205,93 @@ export const AppViewerHeader = (props: AppViewerHeaderProps) => {
       <ForkButton
         className="t--fork-app"
         href={forkAppUrl}
-        text={FORK_APP}
+        intent="primary"
         icon="fork"
+        iconAlignment="left"
+        text={FORK_APP}
+        filled
       />
     );
   } else if (
     currentApplicationDetails?.isPublic &&
     currentUser?.username === ANONYMOUS_USERNAME
   ) {
-    CTA = <Cta className="t--fork-app" href={loginAppUrl} text={SIGN_IN} />;
+    CTA = (
+      <ForkButton
+        className="t--fork-app"
+        href={loginAppUrl}
+        intent="primary"
+        text={SIGN_IN}
+        filled
+      />
+    );
   }
 
   return (
-    <ThemeProvider theme={props.lightTheme}>
-      <HeaderWrapper hasPages={pages.length > 1}>
-        <HtmlTitle />
-        <HeaderRow justify={"space-between"}>
-          <HeaderSection justify={"flex-start"}>
-            <PrimaryLogoLink to={APPLICATIONS_URL}>
-              <AppsmithLogoImg src={AppsmithLogo} alt="Appsmith logo" />
-            </PrimaryLogoLink>
-          </HeaderSection>
-          <HeaderSection justify={"center"} className="current-app-name">
-            {currentApplicationDetails && (
-              <Text type={TextType.H4}>{currentApplicationDetails.name}</Text>
-            )}
-          </HeaderSection>
-          <HeaderSection justify={"flex-end"}>
-            {currentApplicationDetails && (
-              <>
-                <FormDialogComponent
-                  trigger={
-                    <Button
-                      text={"Share"}
-                      icon={"share"}
-                      size={Size.small}
-                      className="t--application-share-btn header__application-share-btn"
-                    />
-                  }
-                  Form={AppInviteUsersForm}
-                  orgId={currentOrgId}
-                  applicationId={currentApplicationDetails.id}
-                  title={currentApplicationDetails.name}
-                  canOutsideClickClose={true}
-                />
-                {CTA && (
-                  <HeaderRightItemContainer>{CTA}</HeaderRightItemContainer>
-                )}
-              </>
-            )}
-            {currentUser && currentUser.username !== ANONYMOUS_USERNAME && (
-              <HeaderRightItemContainer>
-                <ProfileDropdown
-                  userName={currentUser?.username || ""}
-                  hideThemeSwitch
-                  modifiers={{
-                    offset: {
-                      enabled: true,
-                      offset: `0, ${pages.length > 1 ? 35 : 0}`,
-                    },
-                  }}
-                />
-              </HeaderRightItemContainer>
-            )}
-          </HeaderSection>
+    <HeaderWrapper hasPages={pages.length > 1}>
+      <HtmlTitle />
+      <HeaderRow justify={"space-between"}>
+        <HeaderSection justify={"flex-start"}>
+          <Link to={APPLICATIONS_URL}>
+            <AppsmithLogoImg src={AppsmithLogo} alt="Appsmith logo" />
+          </Link>
+        </HeaderSection>
+        <HeaderSection justify={"center"}>
+          {currentApplicationDetails && (
+            <StyledApplicationName>
+              {currentApplicationDetails.name}
+            </StyledApplicationName>
+          )}
+        </HeaderSection>
+        <HeaderSection justify={"flex-end"}>
+          {currentApplicationDetails && (
+            <>
+              <FormDialogComponent
+                trigger={
+                  <ShareButton
+                    text="Share"
+                    intent="none"
+                    outline
+                    size="small"
+                    className="t--application-share-btn"
+                    icon={
+                      <HeaderIcons.SHARE
+                        color={Colors.WHITE}
+                        width={13}
+                        height={13}
+                      />
+                    }
+                  />
+                }
+                Form={AppInviteUsersForm}
+                orgId={currentOrgId}
+                applicationId={currentApplicationDetails.id}
+                title={currentApplicationDetails.name}
+                canOutsideClickClose={true}
+              />
+              {CTA}
+            </>
+          )}
+        </HeaderSection>
+      </HeaderRow>
+      {appPages.length > 1 && (
+        <HeaderRow justify={"flex-start"}>
+          {appPages.map((page) => (
+            <PageTab
+              key={page.pageId}
+              to={getApplicationViewerPageURL(
+                currentApplicationDetails?.id,
+                page.pageId,
+              )}
+              activeClassName="is-active"
+              className="t--page-switch-tab"
+            >
+              <PageTabName name={page.pageName} />
+            </PageTab>
+          ))}
         </HeaderRow>
-        <PageTabsContainer
-          pages={pages}
-          currentApplicationDetails={currentApplicationDetails}
-        />
-      </HeaderWrapper>
-    </ThemeProvider>
+      )}
+    </HeaderWrapper>
   );
 };
 
@@ -254,7 +301,6 @@ const mapStateToProps = (state: AppState): AppViewerHeaderProps => ({
   currentApplicationDetails: state.ui.applications.currentApplication,
   currentOrgId: getCurrentOrgId(state),
   currentUser: getCurrentUser(state),
-  lightTheme: getThemeDetails(state, ThemeMode.LIGHT),
 });
 
 export default connect(mapStateToProps)(AppViewerHeader);

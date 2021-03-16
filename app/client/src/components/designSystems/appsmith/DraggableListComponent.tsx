@@ -14,12 +14,9 @@ type RenderComponentProps = {
   index: number;
   item: {
     label: string;
-    isDerived?: boolean;
   };
   deleteOption: (index: number) => void;
   updateOption: (index: number, value: string) => void;
-  toggleVisibility?: (index: number) => void;
-  onEdit?: (index: number) => void;
 };
 
 interface DroppableComponentProps {
@@ -27,9 +24,7 @@ interface DroppableComponentProps {
   renderComponent: (props: RenderComponentProps) => JSX.Element;
   deleteOption: (index: number) => void;
   updateOption: (index: number, value: string) => void;
-  toggleVisibility?: (index: number) => void;
   updateItems: (items: Array<Record<string, unknown>>) => void;
-  onEdit?: (index: number) => void;
 }
 
 interface DroppableComponentState {
@@ -59,38 +54,36 @@ export class DroppableComponent extends React.Component<
 
   onDragEnd = (result: any) => {
     const { destination, source } = result;
-    const items: Array<Record<string, unknown>> = [...this.state.items];
-    const sourceIndex = source.index;
-    let destinationIndex;
     if (!destination) {
-      destinationIndex = items.length;
-    } else {
-      if (
-        destination.droppableId === source.droppableId &&
-        destination.index === source.index
-      ) {
-        return;
-      }
-      destinationIndex = destination.index;
+      return;
     }
-    items.splice(destinationIndex, 0, items[sourceIndex]);
-    items.splice(sourceIndex + (destinationIndex < sourceIndex ? 1 : 0), 1);
-    this.setState({ items: items });
-    this.props.updateItems(items);
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+    const tabs: Array<Record<string, unknown>> = this.state.items;
+    const sourceTab = tabs[source.index];
+    const destinationTab = tabs[destination.index];
+    const updatedTabs = tabs.map((tab, index) => {
+      if (index === source.index) {
+        return destinationTab;
+      } else if (index === destination.index) {
+        return sourceTab;
+      }
+      return tab;
+    });
+    this.setState({ items: updatedTabs });
+    this.props.updateItems(updatedTabs);
   };
 
   render() {
-    const {
-      renderComponent,
-      deleteOption,
-      updateOption,
-      toggleVisibility,
-      onEdit,
-    } = this.props;
+    const { renderComponent, deleteOption, updateOption } = this.props;
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
         <Droppable droppableId="droppable">
-          {({ innerRef, droppableProps, placeholder }) => (
+          {({ innerRef, droppableProps }) => (
             <DroppableWrapper
               ref={innerRef as React.Ref<HTMLDivElement>}
               {...droppableProps}
@@ -117,8 +110,6 @@ export class DroppableComponent extends React.Component<
                           {renderComponent({
                             deleteOption,
                             updateOption,
-                            toggleVisibility,
-                            onEdit,
                             item,
                             index,
                           })}
@@ -128,7 +119,6 @@ export class DroppableComponent extends React.Component<
                   );
                 },
               )}
-              {placeholder}
             </DroppableWrapper>
           )}
         </Droppable>

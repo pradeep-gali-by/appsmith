@@ -1,148 +1,75 @@
 import styled, { createGlobalStyle } from "styled-components";
 import {
-  CodeEditorBorder,
   EditorSize,
   EditorTheme,
 } from "components/editorComponents/CodeEditor/EditorConfig";
-import {
-  scrollbarDark,
-  scrollbarLight,
-  Skin,
-  Theme,
-} from "constants/DefaultTheme";
+import { Skin, Theme } from "constants/DefaultTheme";
 import { Colors } from "constants/Colors";
 
-export const HintStyles = createGlobalStyle<{
-  editorTheme: EditorTheme;
-  theme: Theme;
-}>`
+export const HintStyles = createGlobalStyle<{ editorTheme: EditorTheme }>`
   .CodeMirror-hints {
     position: absolute;
     z-index: 20;
     overflow: hidden;
     list-style: none;
-    margin-top: ${(props) => props.theme.spaces[3]}px;
+    margin: 0;
     padding: 0px 0px;
     font-size: 90%;
     font-family: monospace;
     max-height: 20em;
     overflow-y: auto;
     background: ${(props) =>
-      props.theme.colors.codeMirror.background.defaultState};
-    box-shadow: 0px 12px 28px -6px rgba(0, 0, 0, 0.32);
-    border-radius: 0px;
-    ${(props) =>
-      props.editorTheme === EditorTheme.LIGHT ? scrollbarLight : scrollbarDark};
+      props.editorTheme === EditorTheme.DARK ? "#090A0F" : "#ffffff"};
+    border: 1px solid;
+    border-color: ${(props) =>
+      props.editorTheme === EditorTheme.DARK ? "#535B62" : "#EBEFF2"}
+    box-shadow: 0px 2px 4px rgba(67, 70, 74, 0.14);
+    border-radius: 1px;
   }
 
   .CodeMirror-hint {
-    height: 24px;
-    color: ${(props) => props.theme.colors.codeMirror.text};
+    height: 25px;
+    color: ${(props) =>
+      props.editorTheme === EditorTheme.DARK ? "#F4F4F4" : "#1E242B"};
     cursor: pointer;
     display: flex;
-    width: 220px;
+    width: 250px;
     align-items: center;
-    font-size: 12px;
-    line-height: 15px;
-    letter-spacing: -0.24px;
-    &:hover {
-      background: ${(props) =>
-        props.theme.colors.codeMirror.background.hoverState};
-      border-radius: 0px;
-      color: #fff;
-      &:after {
-        color: #fff;
-      }
-    }
+    font-size: 13px;
   }
 
   .datasource-hint {
-    padding: 10px;
+    padding: 5px;
     display: block;
     width: 500px;
-    height: 32px;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis; 
+  }
+
+  li.CodeMirror-hint-active {
+    background: ${(props) =>
+      props.editorTheme === EditorTheme.DARK
+        ? "rgba(244,244,244,0.2)"
+        : "rgba(128,136,141,0.2)"};
+    border-radius: 1px;
   }
   .CodeMirror-Tern-completion {
-    padding-left: ${(props) => props.theme.spaces[11]}px !important;
+    padding-left: 22px !important;
     &:hover{
       background: ${(props) =>
-        props.theme.colors.codeMirror.background.hoverState};
+        props.editorTheme === EditorTheme.DARK
+          ? "rgba(244,244,244,0.2)"
+          : "rgba(128,136,141,0.2)"};
     }
   }
   .CodeMirror-Tern-completion:before {
-    left: 7px;
-    bottom: 6px;
-    height: 12px;
-    width: 12px;
-    border-radius: 0;
-    font-size: 10px;
-    line-height: 12px;
-    font-weight: normal;
-    text-align: center;
-    color: ${(props) => props.theme.colors.codeMirror.dataType.shortForm};
-    margin-right: ${(props) => props.theme.spaces[13]}px;
-  }
-  .CodeMirror-Tern-completion-fn:before {
-    background: ${(props) => props.theme.colors.dataTypeBg.function};
-  }
-  .CodeMirror-Tern-completion-object:before {
-    background: ${(props) => props.theme.colors.dataTypeBg.object};
-  }
-  .CodeMirror-Tern-completion-unknown:before {
-    background: ${(props) => props.theme.colors.dataTypeBg.unknown};
-  }
-  .CodeMirror-Tern-completion-array:before {
-    background: ${(props) => props.theme.colors.dataTypeBg.array};
-  }
-  .CodeMirror-Tern-completion-number:before, .CodeMirror-Tern-completion-string:before, .CodeMirror-Tern-completion-bool:before {
-    background: ${(props) => props.theme.colors.dataTypeBg.number};
-  }
-  .CodeMirror-Tern-completion:after {
-    position: absolute;
-    right: 8px;
-    bottom: 6px;
-    font-style: italic;
-    font-weight: normal;
-    font-size: 10px;
-    line-height: 13px;
-    letter-spacing: -0.24px;
-    color: ${(props) => props.theme.colors.codeMirror.dataType.fullForm};
-  }
-  .CodeMirror-Tern-completion-fn:after {
-    content: "Function";
-  }
-  .CodeMirror-Tern-completion-object:after {
-    content: "Object";
-  }
-  .CodeMirror-Tern-completion-unknown:after {
-    content: "Unknown";
-  }
-  .CodeMirror-Tern-completion-array:after {
-    content: "Array";
-  }
-  .CodeMirror-Tern-completion-number:after {
-    content: "Number";
-  }
-  .CodeMirror-Tern-completion-string:after {
-    content: "String";
-  }
-  .CodeMirror-Tern-completion-bool:after {
-    content: "Boolean";
+    left: 4px !important;
+    bottom: 4px !important;
+    line-height: 15px !important;
   }
   .CodeMirror-Tern-tooltip {
     z-index: 20 !important;
-  }
-  li.CodeMirror-hint-active {
-    background: ${(props) =>
-      props.theme.colors.codeMirror.background.hoverState};
-    border-radius: 0px;
-    color: #fff;
-    &:after {
-      color: #fff;
-    }
   }
   .CodeMirror-Tern-hint-doc {
     display: none;
@@ -187,19 +114,6 @@ const getBorderStyle = (
   return "transparent";
 };
 
-const editorBackground = (theme?: EditorTheme) => {
-  let bg = "#FAFAFA";
-  switch (theme) {
-    case EditorTheme.DARK:
-      bg = "#1A191C";
-      break;
-    case EditorTheme.LIGHT:
-      bg = "#FAFAFA";
-      break;
-  }
-  return bg;
-};
-
 export const EditorWrapper = styled.div<{
   editorTheme?: EditorTheme;
   hasError: boolean;
@@ -208,10 +122,6 @@ export const EditorWrapper = styled.div<{
   size: EditorSize;
   height?: string | number;
   borderLess?: boolean;
-  isNotHover?: boolean;
-  border?: CodeEditorBorder;
-  hoverInteraction?: boolean;
-  fill?: boolean;
 }>`
   width: 100%;
   ${(props) =>
@@ -226,43 +136,20 @@ export const EditorWrapper = styled.div<{
       : `position: relative;`}
   min-height: 32px;
   height: ${(props) => props.height || "auto"};
-  background-color: ${(props) => editorBackground(props.editorTheme)};
+  background-color: ${(props) =>
+    props.editorTheme === EditorTheme.DARK ? "#272822" : "#fff"};
   background-color: ${(props) => props.disabled && "#eef2f5"};
+  ${(props) =>
+    !props.borderLess &&
+    `
+    border: 1px solid;
+    border-radius: 4px;
+  `}
   border-color: ${getBorderStyle};
   display: flex;
   flex: 1;
   flex-direction: row;
   text-transform: none;
-  ${(props) =>
-    props.hoverInteraction
-      ? `
-  &:hover {
-    && {
-      .cm-s-duotone-dark.CodeMirror {
-        cursor: pointer;
-        border-radius: 0px;
-        background: ${
-          !props.isNotHover
-            ? Colors.SHARK2
-            : props.isFocused
-            ? Colors.NERO
-            : Colors.BALTIC_SEA
-        };
-      }
-      .cm-s-duotone-light.CodeMirror {
-        cursor: pointer;
-        border-radius: 0px;
-        background: ${
-          !props.isNotHover
-            ? Colors.WHITE_SNOW
-            : props.isFocused
-            ? Colors.MERCURY
-            : Colors.WHITE
-        };
-      }
-    }
-  }`
-      : null};
   && {
     .CodeMirror-cursor {
       border-right: none;
@@ -273,47 +160,17 @@ export const EditorWrapper = styled.div<{
           : props.theme.colors.textDefault} !important;
     }
     .cm-s-duotone-light.CodeMirror {
-      border-radius: 0px;
-      ${(props) =>
-        props.border === "none"
-          ? `border: 0px`
-          : props.border === "bottom-side"
-          ? `border-bottom: 1px solid ${Colors.MERCURY}`
-          : `border: 1px solid ${Colors.MERCURY}`};
-      background: ${(props) =>
-        props.isFocused || props.fill
-          ? Colors.MERCURY
-          : props.theme.colors.codeMirror.background.defaultState};
-      color: ${Colors.CHARCOAL};
+      background: #ffffff;
+      color: #000000 !important;
       & {
         span.cm-operator {
           color: ${(props) => props.theme.colors.textDefault};
         }
       }
-    }
-    .cm-s-duotone-light .CodeMirror-gutters {
-      background: ${Colors.Gallery};
-    }
+     }
     .cm-s-duotone-dark.CodeMirror {
-      border-radius: 0px;
-      ${(props) =>
-        props.border === "none"
-          ? `border: 0px`
-          : props.border === "bottom-side"
-          ? `border-bottom: 1px solid ${Colors.NERO}`
-          : `border: 1px solid ${Colors.NERO}`};
-      background: ${(props) =>
-        props.isFocused || props.fill
-          ? Colors.NERO
-          : props.theme.colors.codeMirror.background.defaultState};
-      color: ${Colors.LIGHT_GREY};
-    }
-    .cm-s-duotone-light .CodeMirror-linenumber,
-    .cm-s-duotone-dark .CodeMirror-linenumber {
-      color: ${Colors.DOVE_GRAY};
-    }
-    .cm-s-duotone-dark .CodeMirror-gutters {
-      background: ${Colors.SHARK2};
+      background: #182026;
+      color: #FFFFFF;
     }
     .binding-brackets {
       ${(props) =>
@@ -328,17 +185,14 @@ export const EditorWrapper = styled.div<{
             };`}
       font-weight: 700;
     }
-    .CodeMirror-matchingbracket {
-      text-decoration: none;
-      color: #ffd600 !important;
-      background-color: #a74444;
+    .CodeMirror-matchingbracket { 
+      text-decoration: none; 
+      color: #FFD600 !important;
+      background-color: #A74444;
     }
     .datasource-highlight {
-      background: ${(props) =>
-        props.editorTheme === EditorTheme.DARK ? "#002B54" : "#e7f3ff"};
-      border: 1px solid
-        ${(props) =>
-          props.editorTheme === EditorTheme.DARK ? "#10569A" : "#69b5ff"};
+      background-color: rgba(104, 113, 239, 0.1);
+      border: 1px solid rgba(104, 113, 239, 0.5);
       padding: 2px;
       border-radius: 2px;
       margin-right: 2px;
@@ -358,8 +212,7 @@ export const EditorWrapper = styled.div<{
     }
     `}
     .CodeMirror pre.CodeMirror-placeholder {
-      color: ${(props) =>
-        props.theme.colors.apiPane.codeEditor.placeholderColor};
+      color: #a3b3bf;
     }
     ${(props) =>
       props.size === EditorSize.COMPACT &&
@@ -374,7 +227,6 @@ export const EditorWrapper = styled.div<{
   }
   && {
     .CodeMirror-lines {
-      padding: ${(props) => props.theme.spaces[2]}px 0px;
       background-color: ${(props) => props.disabled && "#eef2f5"};
       cursor: ${(props) => (props.disabled ? "not-allowed" : "text")};
     }
@@ -423,6 +275,8 @@ export const DynamicAutocompleteInputWrapper = styled.div<{
   height: 100%;
   flex: 1;
   position: relative;
+  border: 1px solid;
+  border-radius: 2px;
   border-color: ${(props) =>
     !props.isError && props.isActive && props.skin === Skin.DARK
       ? Colors.ALABASTER
@@ -438,7 +292,12 @@ export const DynamicAutocompleteInputWrapper = styled.div<{
         ? Colors.ALABASTER
         : "transparent"};
     .lightning-menu {
-      background: ${(props) => (!props.isNotHover ? "#716E6E" : "")};
+      background: ${(props) =>
+        !props.isNotHover
+          ? props.skin === Skin.DARK
+            ? Colors.ALABASTER
+            : Colors.BLUE_CHARCOAL
+          : ""};
       svg {
         path,
         circle {
@@ -451,10 +310,5 @@ export const DynamicAutocompleteInputWrapper = styled.div<{
         }
       }
     }
-  }
-  border: 0px;
-  border-radius: 0px;
-  .lightning-menu {
-    z-index: 1 !important;
   }
 `;

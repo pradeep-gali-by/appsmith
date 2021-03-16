@@ -1,7 +1,7 @@
 import React from "react";
 import { formValueSelector, InjectedFormProps, reduxForm } from "redux-form";
 import styled, { createGlobalStyle } from "styled-components";
-import { Icon, Popover, Spinner, Tag } from "@blueprintjs/core";
+import { Icon, Popover, Position, Spinner, Tag } from "@blueprintjs/core";
 import {
   components,
   MenuListComponentProps,
@@ -9,7 +9,7 @@ import {
   OptionTypeBase,
   SingleValueProps,
 } from "react-select";
-import { isString, isArray } from "lodash";
+import { isString } from "lodash";
 import history from "utils/history";
 import { DATA_SOURCES_EDITOR_URL } from "constants/routes";
 import Button from "components/editorComponents/Button";
@@ -37,6 +37,7 @@ import CenteredWrapper from "components/designSystems/appsmith/CenteredWrapper";
 import ActionSettings from "pages/Editor/ActionSettings";
 import { queryActionSettingsConfig } from "mockResponses/ActionSettings";
 import { addTableWidgetFromQuery } from "actions/widgetActions";
+import OnboardingToolTip from "components/editorComponents/Onboarding/Tooltip";
 import { OnboardingStep } from "constants/OnboardingConstants";
 import Boxed from "components/editorComponents/Onboarding/Boxed";
 import OnboardingIndicator from "components/editorComponents/Onboarding/Indicator";
@@ -46,7 +47,7 @@ const QueryFormContainer = styled.form`
   flex-direction: column;
   padding: 20px 0px;
   width: 100%;
-  height: calc(100vh - ${(props) => props.theme.smallHeaderHeight});
+  height: calc(100vh - ${(props) => props.theme.headerHeight});
   a {
     font-size: 14px;
     line-height: 20px;
@@ -270,7 +271,6 @@ type QueryFormProps = {
   DATASOURCES_OPTIONS: any;
   executedQueryData: {
     body: Record<string, any>[] | string;
-    isExecutionSuccess: boolean;
   };
   applicationId: string;
   runErrorMessage: string | undefined;
@@ -315,32 +315,16 @@ const QueryEditorForm: React.FC<Props> = (props: Props) => {
 
   let error = runErrorMessage;
   let output: Record<string, any>[] | null = null;
-  let displayMessage = "";
 
   if (executedQueryData) {
-    if (!executedQueryData.isExecutionSuccess) {
-      error = String(executedQueryData.body);
-    } else if (isString(executedQueryData.body)) {
-      output = JSON.parse(executedQueryData.body);
+    if (isString(executedQueryData.body)) {
+      error = executedQueryData.body;
     } else {
       output = executedQueryData.body;
     }
   }
 
-  // Constructing the header of the response based on the response
-  if (!output) {
-    displayMessage = "No data records to display";
-  } else if (isArray(output)) {
-    // The returned output is an array
-    displayMessage = output.length
-      ? "Query response"
-      : "No data records to display";
-  } else {
-    // Output is a JSON object. We can display a single object
-    displayMessage = "Query response";
-  }
-
-  const isTableResponse = responseType === "TABLE";
+  const isSQL = responseType === "TABLE";
 
   const dispatch = useDispatch();
   const onAddWidget = () => {
@@ -471,8 +455,8 @@ const QueryEditorForm: React.FC<Props> = (props: Props) => {
             </>
           ) : (
             <OnboardingIndicator
-              step={OnboardingStep.EXAMPLE_DATABASE}
-              width={75}
+              step={OnboardingStep.RUN_QUERY}
+              offset={{ left: -5 }}
             >
               <ActionButton
                 className="t--run-query"
@@ -551,7 +535,11 @@ const QueryEditorForm: React.FC<Props> = (props: Props) => {
                   {!error && output && dataSources.length && (
                     <OutputWrapper>
                       <OutputHeader>
-                        <p className="statementTextArea">{displayMessage}</p>
+                        <p className="statementTextArea">
+                          {output.length
+                            ? "Query response"
+                            : "No data records to display"}
+                        </p>
                         {!!output.length && (
                           <Boxed step={OnboardingStep.SUCCESSFUL_BINDING}>
                             <AddWidgetButton
@@ -563,8 +551,17 @@ const QueryEditorForm: React.FC<Props> = (props: Props) => {
                           </Boxed>
                         )}
                       </OutputHeader>
-                      {isTableResponse ? (
-                        <Table data={output} />
+                      {isSQL ? (
+                        <OnboardingToolTip
+                          position={Position.TOP}
+                          step={[OnboardingStep.RUN_QUERY_SUCCESS]}
+                          offset={{
+                            enabled: true,
+                            offset: "-200, 0",
+                          }}
+                        >
+                          <Table data={output} />
+                        </OnboardingToolTip>
                       ) : (
                         <JSONViewer src={output} />
                       )}
@@ -598,13 +595,23 @@ const renderEachConfig = (section: any): any => {
       return renderEachConfig(formControlOrSection);
     } else {
       try {
-        const { configProperty } = formControlOrSection;
+        const { configProperty, controlType } = formControlOrSection;
         return (
           <FieldWrapper key={configProperty}>
-            <FormControl
-              config={formControlOrSection}
-              formName={QUERY_EDITOR_FORM_NAME}
-            />
+            <OnboardingToolTip
+              step={[OnboardingStep.RUN_QUERY]}
+              show={controlType === "QUERY_DYNAMIC_TEXT"}
+              position={Position.TOP_LEFT}
+              offset={{
+                enabled: true,
+                offset: "200, 0",
+              }}
+            >
+              <FormControl
+                config={formControlOrSection}
+                formName={QUERY_EDITOR_FORM_NAME}
+              />
+            </OnboardingToolTip>
           </FieldWrapper>
         );
       } catch (e) {

@@ -21,7 +21,6 @@ import { Skin } from "constants/DefaultTheme";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import "components/editorComponents/CodeEditor/modes";
 import {
-  CodeEditorBorder,
   EditorConfig,
   EditorModes,
   EditorSize,
@@ -74,17 +73,11 @@ export type EditorStyleProps = {
   evaluatedValue?: any;
   expected?: string;
   borderLess?: boolean;
-  border?: CodeEditorBorder;
-  hoverInteraction?: boolean;
-  fill?: boolean;
 };
 
 export type EditorProps = EditorStyleProps &
   EditorConfig & {
     input: Partial<WrappedFieldInputProps>;
-  } & {
-    additionalDynamicData?: Record<string, Record<string, unknown>>;
-    promptMessage?: React.ReactNode | string;
   };
 
 type Props = ReduxStateProps & EditorProps;
@@ -209,11 +202,7 @@ class CodeEditor extends Component<Props, State> {
 
   startAutocomplete() {
     this.hinters = this.props.hinting.map((helper) => {
-      return helper(
-        this.editor,
-        this.props.dynamicData,
-        this.props.additionalDynamicData,
-      );
+      return helper(this.editor, this.props.dynamicData);
     });
   }
 
@@ -328,9 +317,6 @@ class CodeEditor extends Component<Props, State> {
       evaluatedValue,
       height,
       borderLess,
-      border,
-      hoverInteraction,
-      fill,
     } = this.props;
     const hasError = !!(meta && meta.error);
     let evaluated = evaluatedValue;
@@ -376,7 +362,7 @@ class CodeEditor extends Component<Props, State> {
           hasError={hasError}
         >
           <EditorWrapper
-            editorTheme={this.props.theme}
+            editorTheme={theme}
             hasError={hasError}
             size={size}
             isFocused={this.state.isFocused}
@@ -384,10 +370,6 @@ class CodeEditor extends Component<Props, State> {
             className={className}
             height={height}
             borderLess={borderLess}
-            border={border}
-            isNotHover={this.state.isFocused || this.state.isOpened}
-            hoverInteraction={hoverInteraction}
-            fill={fill}
           >
             <HintStyles editorTheme={theme || EditorTheme.LIGHT} />
             {this.props.leftIcon && (
@@ -424,8 +406,6 @@ class CodeEditor extends Component<Props, State> {
             )}
             <BindingPrompt
               isOpen={showBindingPrompt(showEvaluatedValue, input.value)}
-              promptMessage={this.props.promptMessage}
-              editorTheme={this.props.theme}
             />
           </EditorWrapper>
         </EvaluatedValuePopup>

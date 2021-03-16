@@ -1,17 +1,15 @@
 import React from "react";
-import { IconProps } from "constants/IconConstants";
+import { IconProps, IconWrapper } from "constants/IconConstants";
+import { ReactComponent as LightningIcon } from "assets/icons/control/lightning.svg";
 import { LIGHTNING_MENU_DATA_TOOLTIP } from "constants/messages";
 import { Theme, Skin } from "constants/DefaultTheme";
 import styled from "styled-components";
-import Icon, { IconSize } from "components/ads/Icon";
-import { Position } from "@blueprintjs/core";
-import Tooltip from "components/ads/Tooltip";
+import { Tooltip } from "@blueprintjs/core";
 
 const LightningIconWrapper = styled.span<{
   background: string;
   skin: Skin;
   isFocused: boolean;
-  color?: string;
 }>`
   background: ${(props) => (props.isFocused ? "none" : props.background)};
   position: absolute;
@@ -20,12 +18,9 @@ const LightningIconWrapper = styled.span<{
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 0px;
-  svg path {
-    fill: ${(props) => !props.isFocused && props.color};
-  }
-  width: ${(props) => (props.skin === Skin.LIGHT ? 32 : 32)}px;
-  height: ${(props) => (props.skin === Skin.LIGHT ? 32 : 32)}px;
+  border-radius: 2px;
+  width: ${(props) => (props.skin === Skin.LIGHT ? 30 : 30)}px;
+  height: ${(props) => (props.skin === Skin.LIGHT ? 30 : 30)}px;
   z-index: 10;
   cursor: pointer;
   &:hover {
@@ -70,7 +65,6 @@ export const LightningMenuTrigger = (props: LightningMenuTriggerProps) => {
   const { background, iconProps } = getMenuState();
   return (
     <LightningIconWrapper
-      color={iconProps.color}
       background={background}
       onClick={() => {
         if (props.onOpenLightningMenu) {
@@ -82,14 +76,14 @@ export const LightningMenuTrigger = (props: LightningMenuTriggerProps) => {
       isFocused={props.isFocused}
     >
       <Tooltip
-        content={LIGHTNING_MENU_DATA_TOOLTIP}
         autoFocus={false}
         hoverOpenDelay={1000}
+        content={LIGHTNING_MENU_DATA_TOOLTIP}
         openOnTargetFocus={false}
-        minWidth={180}
-        position={Position.LEFT}
       >
-        <Icon name="lightning" size={IconSize.LARGE} />
+        <IconWrapper {...iconProps}>
+          <LightningIcon />
+        </IconWrapper>
       </Tooltip>
     </LightningIconWrapper>
   );

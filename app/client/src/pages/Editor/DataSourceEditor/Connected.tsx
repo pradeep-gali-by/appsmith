@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 import { AppState } from "reducers";
 import { isNil } from "lodash";
+import { Position } from "@blueprintjs/core";
 import { BaseButton } from "components/designSystems/blueprint/ButtonComponent";
 import { getDatasource, getPlugin } from "selectors/entitiesSelector";
 import { Colors } from "constants/Colors";
@@ -21,6 +22,7 @@ import { ApiActionConfig, PluginType, QueryAction } from "entities/Action";
 import { renderDatasourceSection } from "./DatasourceSection";
 import { Toaster } from "components/ads/Toast";
 import { Variant } from "components/ads/common";
+import OnboardingToolTip from "components/editorComponents/Onboarding/Tooltip";
 import { OnboardingStep } from "constants/OnboardingConstants";
 import { inOnboarding } from "sagas/OnboardingSagas";
 import OnboardingIndicator from "components/editorComponents/Onboarding/Indicator";
@@ -51,8 +53,8 @@ const Wrapper = styled.div`
 `;
 
 const ActionButton = styled(BaseButton)`
-  &&&& {
-    width: auto;
+  &&& {
+    max-width: 140px;
     align-self: center;
   }
 `;
@@ -65,6 +67,9 @@ const Connected = () => {
 
   // Onboarding
   const isInOnboarding = useSelector(inOnboarding);
+  const showingTooltip = useSelector(
+    (state: AppState) => state.ui.onBoarding.showingTooltip,
+  );
 
   const dispatch = useDispatch();
   const actions = useSelector((state: AppState) => state.entities.actions);
@@ -93,13 +98,15 @@ const Connected = () => {
       },
     } as Partial<QueryAction>; // TODO: refactor later. Handle case for undefined datasource before we reach here.
     if (datasource)
-      if (isInOnboarding) {
+      if (
+        isInOnboarding &&
+        showingTooltip === OnboardingStep.EXAMPLE_DATABASE
+      ) {
         // If in onboarding and tooltip is being shown
         payload = Object.assign({}, payload, {
-          name: "fetch_standup_updates",
+          name: "ExampleQuery",
           actionConfiguration: {
-            body:
-              "Select avatar, name, notes from standup_updates order by id desc",
+            body: "select * from public.users limit 10",
           },
         });
       }
@@ -166,11 +173,16 @@ const Connected = () => {
             height={30}
             width={30}
           />
-
-          <div style={{ marginLeft: "12px" }}>Datasource Connected</div>
+          <OnboardingToolTip
+            position={Position.TOP_LEFT}
+            step={[OnboardingStep.EXAMPLE_DATABASE]}
+            offset={{ enabled: true, offset: "200, 0" }}
+          >
+            <div style={{ marginLeft: "12px" }}>Datasource Connected</div>
+          </OnboardingToolTip>
         </ConnectedText>
 
-        <OnboardingIndicator step={OnboardingStep.EXAMPLE_DATABASE} width={120}>
+        <OnboardingIndicator step={OnboardingStep.EXAMPLE_DATABASE}>
           <ActionButton
             className="t--create-query"
             icon={"plus"}

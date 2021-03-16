@@ -10,11 +10,11 @@ import { getDatasource } from "selectors/entitiesSelector";
 import { useSelector, useDispatch } from "react-redux";
 import { Datasource } from "entities/Datasource";
 import { getDataSources } from "selectors/editorSelectors";
+import { getDataTree } from "selectors/dataTreeSelectors";
 import { isNameValid } from "utils/helpers";
 import { saveDatasourceName } from "actions/datasourceActions";
 import { Spinner } from "@blueprintjs/core";
-import { checkCurrentStep } from "sagas/OnboardingSagas";
-import { OnboardingStep } from "constants/OnboardingConstants";
+import { getCurrentStep, inOnboarding } from "sagas/OnboardingSagas";
 
 const Wrapper = styled.div`
   margin-left: 10px;
@@ -37,8 +37,8 @@ const FormTitle = (props: FormTitleProps) => {
     | undefined = useSelector((state: AppState) =>
     getDatasource(state, params.datasourceId),
   );
-
   const datasources: Datasource[] = useSelector(getDataSources);
+  const evalTree = useSelector(getDataTree);
   const [forceUpdate, setForceUpdate] = useState(false);
   const dispatch = useDispatch();
   const saveStatus: {
@@ -54,9 +54,12 @@ const FormTitle = (props: FormTitleProps) => {
   });
 
   // For onboarding
-  const hideEditIcon = useSelector((state: AppState) =>
-    checkCurrentStep(state, OnboardingStep.SUCCESSFUL_BINDING, "LESSER"),
-  );
+  const hideEditIcon = useSelector((state: AppState) => {
+    const currentStep = getCurrentStep(state);
+    const isInOnboarding = inOnboarding(state);
+
+    return isInOnboarding && currentStep < 3;
+  });
 
   const hasNameConflict = React.useCallback(
     (name: string) => {
@@ -67,7 +70,7 @@ const FormTitle = (props: FormTitleProps) => {
           datasourcesNames[datasource.name] = datasource;
         });
 
-      return !isNameValid(name, { ...datasourcesNames });
+      return !isNameValid(name, { ...datasourcesNames, ...evalTree });
     },
     [datasources, currentDatasource],
   );
